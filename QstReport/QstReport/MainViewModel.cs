@@ -13,6 +13,10 @@ namespace QstReport
     using QstReport.Utils;
     using QstReport.DataModel;
     using QstReport.Siam;
+    using QstReport.Report;
+    using System.Threading.Tasks;
+    using System.IO;
+    using System.Diagnostics;
 
     /// <summary>
     /// Le view model principal de l'application.
@@ -58,6 +62,16 @@ namespace QstReport
                 _worker.ReportProgress(20, "Récupération des AVTs");
                 reportData.AvtCollection = siamRepository.GetAvts(reportData.ReportPeriod.Start, reportData.ReportPeriod.End);
             }
+
+
+            _worker.ReportProgress(10, "Création du rapport");
+
+            string reportFileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), string.Format("Bilan RCO du {0}", currentWeek.Start.Date));
+            var reportWriter = new ExcelReportWriter();
+            reportWriter.WriteReport(reportData, reportFileName);
+            
+            _worker.ReportProgress(10, "Ouverture du rapport");
+            Task.Run(() => Process.Start(reportFileName));
         }
 
         /// <summary>
@@ -82,7 +96,7 @@ namespace QstReport
         private double currentProgress;
         public double CurrentProgress
         {
-            get { return this.currentProgress; }
+            get { return currentProgress; }
             set { SetProperty(ref currentProgress, value); }
         }
 
@@ -95,7 +109,7 @@ namespace QstReport
             get { return currentProgressText; }
             set { SetProperty(ref currentProgressText, value); }
         }
-
+        
         #region INotifyPropertyChanged Implementation
 
         /// <summary>
