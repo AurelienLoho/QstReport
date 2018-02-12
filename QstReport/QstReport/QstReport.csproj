@@ -37,12 +37,18 @@
     <Reference Include="HtmlAgilityPack, Version=1.6.16.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>..\packages\HtmlAgilityPack.1.6.16\lib\Net45\HtmlAgilityPack.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\packages\Microsoft.Office.Interop.Excel.15.0.4795.1000\lib\net20\Microsoft.Office.Interop.Excel.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -65,7 +71,12 @@
     <Compile Include="DataModel\AvtType.cs" />
     <Compile Include="DataModel\Entite.cs" />
     <Compile Include="DataModel\Pole.cs" />
+    <Compile Include="DataModel\ReportData.cs" />
     <Compile Include="DataModel\Superviseur.cs" />
+    <Compile Include="Report\ExcelReportWriter.cs" />
+    <Compile Include="Report\Excel\CurrentWeekAvtReportSheetWriter.cs" />
+    <Compile Include="Report\Excel\IExcelSheetWriter.cs" />
+    <Compile Include="Report\IReportWriter.cs" />
     <Compile Include="Siam\SiamConstants.cs" />
     <Compile Include="Siam\SiamParser.cs" />
     <Compile Include="Siam\SiamRepository.cs" />

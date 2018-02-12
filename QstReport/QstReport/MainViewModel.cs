@@ -11,6 +11,7 @@ namespace QstReport
     using System.Runtime.CompilerServices;
     using System.Windows.Input;
     using QstReport.Utils;
+    using QstReport.DataModel;
     using QstReport.Siam;
 
     /// <summary>
@@ -46,7 +47,17 @@ namespace QstReport
         /// <param name="e"></param>
         public void DoWork(object sender, DoWorkEventArgs e)
         {
-            
+            var currentWeek = new Week(DateTime.Now);
+
+            var reportData = new ReportData { ReportPeriod = new TimePeriod(currentWeek.Start, currentWeek.End) };
+
+            _worker.ReportProgress(10, "Connexion à SIAM");
+
+            using (var siamRepository = new SiamRepository(SIAM_URL, SIAM_USER, SIAM_PASSWORD))
+            {
+                _worker.ReportProgress(20, "Récupération des AVTs");
+                reportData.AvtCollection = siamRepository.GetAvts(reportData.ReportPeriod.Start, reportData.ReportPeriod.End);
+            }
         }
 
         /// <summary>

@@ -8,6 +8,7 @@ namespace QstReport.Utils
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     public static class EnumerableExtensionMethods
     {
@@ -22,6 +23,11 @@ namespace QstReport.Utils
                     yield return item;
                 }
             }
+        }
+
+        public static long UniqueCount<T, K>(this IEnumerable<T> source, Func<T,K> keySelector)
+        {
+            return source.DistinctBy(keySelector).Count();
         }
     }
 }
