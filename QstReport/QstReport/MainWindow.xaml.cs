@@ -23,6 +23,8 @@ namespace QstReport
         public MainWindow()
         {
             InitializeComponent();
+
+            DataContext = new MainViewModel();
         }
     }
 }

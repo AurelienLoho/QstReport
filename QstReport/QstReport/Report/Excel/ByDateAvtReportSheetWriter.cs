@@ -1,17 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using xL = Microsoft.Office.Interop.Excel;
-using QstReport.DataModel;
-using System.Drawing;
-using QstReport.Utils;
-using System.Globalization;
+﻿/**********************************************************************************************/
+/**** Fichier : ByDateAvtReportSheetWriter.cs                                              ****/
+/**** Projet  : QstReport                                                                  ****/
+/**** Auteur  : LOHO Aurélien (SNA-RP/CDG/ST/DO-QST-INS)                                   ****/
+/**********************************************************************************************/
 
 namespace QstReport.Report.Excel
 {
-    public sealed class CurrentWeekAvtReportSheetWriter
+    using QstReport.DataModel;
+    using QstReport.Utils;
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.Globalization;
+    using System.Linq;
+    using xL = Microsoft.Office.Interop.Excel;
+
+    public sealed class ByDateAvtReportSheetWriter
     {
         private static readonly Color TableHeaderBackgroundColor = Color.LightGray;
         private static readonly Color TableDateHeaderBackgroundColor = Color.Chocolate;
@@ -48,10 +52,7 @@ namespace QstReport.Report.Excel
             var groupedByDate = expandedAvts.GroupBy(x => x.Period.Start);
 
             var alreadySeenAvt = new HashSet<string>();
-
-            // TODO : ....
-
-
+            
             foreach (var group in groupedByDate)
             {
                 /* Date du jour */

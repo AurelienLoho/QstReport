@@ -6,12 +6,11 @@
 
 namespace QstReport.Report
 {
-    using System;
     using QstReport.DataModel;
-    using xL = Microsoft.Office.Interop.Excel;
+    using QstReport.Utils;
     using System.Reflection;
     using System.Runtime.InteropServices;
-    using QstReport.Utils;
+    using xL = Microsoft.Office.Interop.Excel;
 
     public sealed class ExcelReportWriter : IReportWriter
     {
@@ -30,10 +29,9 @@ namespace QstReport.Report
             _xlApp = new xL.Application();
             _xlWorkbook = _xlApp.Workbooks.Add(Missing.Value);
 
-            var currentWeekAvtSheet = (xL.Worksheet)_xlWorkbook.Worksheets.Add();
-            currentWeekAvtSheet.Name = "AVT Semaine courante";
-            var currentWeekAvtWriter = new Excel.CurrentWeekAvtReportSheetWriter();
-            currentWeekAvtWriter.WriteSheetData(currentWeekAvtSheet, new Week(data.ReportPeriod.End), data.AvtCollection);
+            WriteCurrentWeekAvts(data);
+
+            WritePastWeekAvts(data);
             
             try
             {
@@ -49,12 +47,18 @@ namespace QstReport.Report
 
         private void WriteCurrentWeekAvts(ReportData data)
         {
-
+            var currentWeekAvtSheet = (xL.Worksheet)_xlWorkbook.Worksheets.Add();
+            currentWeekAvtSheet.Name = "AVT Semaine courante";
+            var currentWeekAvtWriter = new Excel.ByDateAvtReportSheetWriter();
+            currentWeekAvtWriter.WriteSheetData(currentWeekAvtSheet, new Week(data.ReportPeriod.End), data.AvtCollection);
         }
 
         private void WritePastWeekAvts(ReportData data)
         {
-
+            var pastWeekAvtSheet = (xL.Worksheet)_xlWorkbook.Worksheets.Add();
+            pastWeekAvtSheet.Name = "AVT Semaine passée";
+            var pastWeekAvtWriter = new Excel.ByOwnerAvtReportSheetWriter();
+            pastWeekAvtWriter.CreateReport(pastWeekAvtSheet, new Week(data.ReportPeriod.Start), data.AvtCollection);
         }
 
         private void WritePastWeekEvents(ReportData data)

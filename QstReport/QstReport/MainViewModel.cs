@@ -142,7 +142,7 @@ namespace QstReport
             }
 
             storage = value;
-            this.RaisePropertyChanged(propertyName);
+            RaisePropertyChanged(propertyName);
             return true;
         }
 
