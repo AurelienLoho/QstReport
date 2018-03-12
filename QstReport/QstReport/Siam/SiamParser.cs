@@ -32,6 +32,8 @@ namespace QstReport.Siam
             var refAvt = rawTitle.Substring(1, cutIndex - 1);
             var title = rawTitle.Substring(cutIndex + 1);
 
+            var isMiso = node.SelectNodes("//td[@colspan='4']/a").Any(x => x.InnerText == "MISO");
+
             var infoNodes = node.SelectNodes("//table[@class='form']/tbody/tr").ToList();
 
             if (infoNodes[1].InnerText.StartsWith("Début"))
@@ -52,6 +54,7 @@ namespace QstReport.Siam
                     WorkPeriods = new TimePeriodCollection { new TimePeriod(startDate, endDate) },
                     Pole = PoleFromRefSiam(refSiam),
                     Entite = EntiteFromRefSiam(refSiam),
+                    AvtType = isMiso ? AvtType.MISO : AvtType.AVT,
                     Description = HtmlEntity.DeEntitize(infoNodes[8].InnerText),
                     Consequences = HtmlEntity.DeEntitize(infoNodes[10].SelectNodes("td")[1].InnerText),
                     ImpactedEquipments = HtmlEntity.DeEntitize(infoNodes[5].SelectNodes("td")[1].InnerText).Split(',').ToList(),
@@ -85,6 +88,7 @@ namespace QstReport.Siam
                     WorkPeriods = timePeriodCollection,
                     Pole = PoleFromRefSiam(refSiam),
                     Entite = EntiteFromRefSiam(refSiam),
+                    AvtType = isMiso ? AvtType.MISO : AvtType.AVT,
                     Description = HtmlEntity.DeEntitize(infoNodes[7].InnerText),
                     Consequences = HtmlEntity.DeEntitize(infoNodes[9].SelectNodes("td")[1].InnerText),
                     ImpactedEquipments = HtmlEntity.DeEntitize(infoNodes[4].SelectNodes("td")[1].InnerText).Split(',').ToList(),
@@ -93,6 +97,71 @@ namespace QstReport.Siam
 
                 return avt;
             }
+        }
+        
+        public static TechEvent ParseHtmlAsTechEvent(HtmlNode node, DateTime day)
+        {
+            var idText = node.GetAttributeValue("id", string.Empty);
+
+            if (string.IsNullOrEmpty(idText))
+            {
+                return null;
+            }
+
+            var id = int.Parse(idText.Substring(8));
+            var columns = node.SelectNodes("td");
+
+            var timeText = columns[2].InnerText.Trim('[').Trim(']');
+            var time = TimeSpan.ParseExact(timeText, "g", CultureInfo.CurrentCulture);
+
+            var evt = new TechEvent
+            {
+                IdSiam = id,
+                ReferenceSiam = columns[1].InnerText,
+                StartDate = day + time,
+                CalculatedDuration = columns[3].InnerText,
+                Group = columns[5].InnerText,
+                Title = columns[7].InnerText
+            };
+
+            var optionsNodes = columns[7].SelectNodes(".//img[@class='imgMid']");
+
+            if (optionsNodes != null)
+            {
+                foreach (var n in optionsNodes)
+                {
+                    var attr = n.Attributes.FirstOrDefault(x => x.Name == "src").Value;
+                    attr = attr.Substring(attr.LastIndexOf('/') + 1);
+
+                    switch (attr)
+                    {
+                        case "CR_on.gif":
+                            {
+                                evt.Selected = true;
+                                break;
+                            }
+                        case "REX_on.gif":
+                            {
+                                evt.RexAsked = true;
+                                break;
+                            }
+                        case "CR_REX_on.gif":
+                            {
+                                evt.RexAsked = true;
+                                evt.Selected = true;
+                                break;
+                            }
+                        case "ghost.png":
+                            {
+                                evt.Modified = true;
+                                break;
+                            }
+                        default: break;
+                    }
+                }
+            }
+
+            return evt;
         }
 
         /// <summary>
@@ -116,7 +185,8 @@ namespace QstReport.Siam
         {
             var idText = node.GetAttributeValue("id", string.Empty);
             var caretIndex = idText.LastIndexOf('-');
-            var result = Int32.TryParse(idText.Substring(caretIndex + 1), out int id);
+            int id = -1;
+            var result = Int32.TryParse(idText.Substring(caretIndex + 1), out id);
             if (!result)
             {
                 return null;

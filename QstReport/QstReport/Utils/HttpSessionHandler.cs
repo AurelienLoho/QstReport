@@ -21,6 +21,8 @@ namespace QstReport.Utils
         /// </summary>
         private readonly string _hostName;
 
+        private readonly bool _useHttps = true;
+
         /// <summary>
         /// Initialise une nouvelle instance de la classe <see cref="HttpSessionHandler"/>.
         /// </summary>
@@ -28,6 +30,12 @@ namespace QstReport.Utils
         public HttpSessionHandler(string hostName)
         {
             _hostName = hostName;
+        }
+
+        public HttpSessionHandler(string hostName, bool useHttps)
+        {
+            _hostName = hostName;
+            _useHttps = useHttps;
         }
 
         /// <summary>
@@ -102,7 +110,8 @@ namespace QstReport.Utils
         /// <returns></returns>
         private HttpWebRequest CreateBaseRequest(string url, string method)
         {
-            HttpWebRequest request = WebRequest.CreateHttp("https://" + url);
+            var protocol = _useHttps ? "https://" : "http://";
+            HttpWebRequest request = WebRequest.CreateHttp(protocol + url);
             request.Method = method;
             request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:38.0) Gecko/20100101 Firefox/38.0";
             request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";

@@ -7,10 +7,12 @@
 namespace QstReport.Utils
 {
     using System;
+    using System.Diagnostics;
 
     /// <summary>
     /// Une période de temps.
     /// </summary>
+    [DebuggerDisplay("du {Start} au {End}")]
     public sealed class TimePeriod
     {
         /// <summary>

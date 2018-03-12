@@ -34,7 +34,7 @@ namespace QstReport.Siam
         public SiamRepository(string url, string userName, string password)
         {
             _siamUrl = url;
-            _httpSession = new HttpSessionHandler(url);
+            _httpSession = new HttpSessionHandler("siam.tech.cana.ri"); // TODO : find a way to get host name from url
 
             Connect(userName, password);
         }
@@ -52,9 +52,39 @@ namespace QstReport.Siam
             return avtIds.Select(x => GetAvtData(x)).ToList();
         }
 
+        public List<TechEvent> GetTechEvents(DateTime startDate, DateTime endDate)
+        {
+            var baseUrl = _siamUrl + SiamConstants.MAIN_COURANTE_URL;
+
+            var events = new List<TechEvent>();
+
+            foreach (var day in startDate.EachDayTo(endDate))
+            {
+                var requestUrl = string.Format("{0}&select={1}", baseUrl, day.ToString("dd-MM-yyyy"));
+
+                using (var httpResponse = _httpSession.SendGetRequest(requestUrl))
+                {
+                    var htmlDoc = httpResponse.AsHtml();
+                    var eventNodes = htmlDoc.SelectNodes("//table[@class='tblContext']/tbody/tr");
+
+                    if (eventNodes == null)
+                    {
+                        return new List<TechEvent>();
+                    }
+
+                    var foundEvents = eventNodes.Select(x => SiamParser.ParseHtmlAsTechEvent(x, day))
+                                     .Where(x => x != null && x.Modified == false);
+
+                    events.AddRange(foundEvents);
+                }
+            }
+
+            return events;
+        }
+
         private Avt GetAvtData(int agendaIndex)
         {
-            var requestUrl = string.Format("{0}/appli/agenda/?id={1}", _siamUrl, agendaIndex);
+            var requestUrl = string.Format("{0}/actuel/appli/agenda/?id={1}", _siamUrl, agendaIndex);
 
             using (var httpResponse = _httpSession.SendGetRequest(requestUrl))
             {

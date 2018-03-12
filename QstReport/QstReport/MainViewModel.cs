@@ -17,15 +17,20 @@ namespace QstReport
     using System.Threading.Tasks;
     using System.IO;
     using System.Diagnostics;
+    using QstReport.Epeires;
 
     /// <summary>
     /// Le view model principal de l'application.
     /// </summary>
     public sealed class MainViewModel : IDisposable, INotifyPropertyChanged
     {
-        private const string SIAM_URL = "https://siam.tech.cana.ri/actuel";
+        private const string SIAM_URL = "siam.tech.cana.ri";
         private const string SIAM_USER = "QST";
         private const string SIAM_PASSWORD = "qstdo";
+
+        private const string EPEIRES_URL = "epeires.cdg-lb.aviation";
+        private const string EPEIRES_USER = "QST";
+        private const string EPEIRES_PASSWORD = "EpeiresQST";
 
         /// <summary>
         /// Ordonnanceur de tâches.
@@ -52,26 +57,43 @@ namespace QstReport
         public void DoWork(object sender, DoWorkEventArgs e)
         {
             var currentWeek = new Week(DateTime.Now);
+            var lastWeek = currentWeek.PreviousWeek();
 
-            var reportData = new ReportData { ReportPeriod = new TimePeriod(currentWeek.Start, currentWeek.End) };
+            var reportData = new ReportData { ReportPeriod = new TimePeriod(lastWeek.Start, currentWeek.End) };
 
-            _worker.ReportProgress(10, "Connexion à SIAM");
+            _worker.ReportProgress(10, "Connexion à SIAM...");
 
             using (var siamRepository = new SiamRepository(SIAM_URL, SIAM_USER, SIAM_PASSWORD))
             {
-                _worker.ReportProgress(20, "Récupération des AVTs");
+                _worker.ReportProgress(20, "Récupération des AVT...");
                 reportData.AvtCollection = siamRepository.GetAvts(reportData.ReportPeriod.Start, reportData.ReportPeriod.End);
+
+                _worker.ReportProgress(20, "Récupération des évènements techniques...");
+                reportData.TechEventCollection = siamRepository.GetTechEvents(lastWeek.Start, lastWeek.End);
+
+                _worker.ReportProgress(30, "Déconnexion de SIAM...");
             }
 
+            _worker.ReportProgress(40, "Connexion à EPEIRES...");
+            using(var epeiresRepository = new EpeiresRepository(EPEIRES_URL, EPEIRES_USER, EPEIRES_PASSWORD))
+            {
+                _worker.ReportProgress(50, "Récupération des évènements exploitation...");
+                reportData.ExploitEventCollection = epeiresRepository.GetExploitEvents(lastWeek.Start, lastWeek.End);
 
-            _worker.ReportProgress(10, "Création du rapport");
+                _worker.ReportProgress(60, "Déconnexion de EPEIRES...");
+            }
 
-            string reportFileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), string.Format("Bilan RCO du {0}", currentWeek.Start.Date));
+            _worker.ReportProgress(80, "Mise en forme des données...");
+
+            string reportFileName = string.Format("Bilan RCO du {0}.xlsx", currentWeek.Start.ToString("yyyy-MM-dd"));
+            string reportPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), reportFileName);
+
+            _worker.ReportProgress(90, "Sauvegarde du rapport...");
             var reportWriter = new ExcelReportWriter();
-            reportWriter.WriteReport(reportData, reportFileName);
+            reportWriter.WriteReport(reportData, reportPath);
             
-            _worker.ReportProgress(10, "Ouverture du rapport");
-            Task.Run(() => Process.Start(reportFileName));
+            _worker.ReportProgress(100, "Ouverture du rapport");
+            Task.Run(() => Process.Start(reportPath));
         }
 
         /// <summary>
@@ -118,7 +140,12 @@ namespace QstReport
         /// <param name="propertyName">Le nom de de la propriété modifiée.</param>
         private void RaisePropertyChanged(string propertyName)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            var handler = PropertyChanged;
+
+            if(handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
 
         /// <summary>

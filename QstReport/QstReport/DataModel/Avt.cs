@@ -8,7 +8,9 @@ namespace QstReport.DataModel
 {
     using QstReport.Utils;
     using System.Collections.Generic;
+    using System.Diagnostics;
 
+    [DebuggerDisplay("{Id}")]
     public class Avt
     {
         /// <summary>

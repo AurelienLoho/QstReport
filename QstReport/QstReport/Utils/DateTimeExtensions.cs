@@ -14,6 +14,8 @@ namespace QstReport.Utils
         /// </summary>
         private static readonly TimeSpan FullWeekDuration = new TimeSpan(6, 23, 59, 59);
 
+        private static readonly TimeSpan FullDayDuration = new TimeSpan(23, 59, 59);
+
         /// Enumère les jours entre deux dates.
         /// </summary>
         /// <param name="start">La date de départ.</param>
@@ -78,6 +80,16 @@ namespace QstReport.Utils
         public static DateTime LastDateOfWeek(this DateTime date)
         {
             return date.FirstDateOfWeek().Add(FullWeekDuration);
+        }
+
+        public static DateTime StartOfDay(this DateTime date)
+        {
+            return date.Date;
+        }
+
+        public static DateTime EndOfDay(this DateTime date)
+        {
+            return date.Date.Add(FullDayDuration);
         }
     }
 }

@@ -25,7 +25,7 @@ namespace QstReport.DataModel
         [Display(Name = "Energie / Climatisation", ShortName = "NRJ")]
         EnergieClimatisation,
 
-        [Display(Name = "Radio / Téléphone", ShortName = "RADIO")]
+        [Display(Name = "Radio / Téléphone / Installation", ShortName = "RADIO")]
         RadioTelephone,
 
         [Display(Name = "Radionavigation", ShortName = "RNAV")]

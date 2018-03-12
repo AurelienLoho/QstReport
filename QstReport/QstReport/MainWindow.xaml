@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:QstReport"
         mc:Ignorable="d"
-        Title="Bilan hebdomadaire QST"
+        Title="Bilan hebdomadaire QST V3"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen">
     <Grid>
@@ -19,10 +19,10 @@
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
 
-        <Button Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" Content="Générer le rapport" Command="{Binding CreateReportCommand}" Margin="5"/>
+        <Button Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Content="Générer le rapport" Command="{Binding CreateReportCommand}" Margin="5"/>
 
         <ProgressBar Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Value="{Binding CurrentProgress}" Width="340" Height="30" Margin="0,0,0,5" VerticalAlignment="Center"/>
 
-        <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding CurrentProgressText}" FontWeight="Bold" Height="25" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,0,0,0"/>
+        <TextBlock Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Text="{Binding CurrentProgressText}" FontWeight="Bold" Height="25" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,0,0,0"/>
     </Grid>
 </Window>
