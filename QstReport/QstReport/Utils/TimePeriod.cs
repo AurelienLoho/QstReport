@@ -7,13 +7,14 @@
 namespace QstReport.Utils
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
 
     /// <summary>
     /// Une période de temps.
     /// </summary>
     [DebuggerDisplay("du {Start} au {End}")]
-    public sealed class TimePeriod
+    public class TimePeriod
     {
         /// <summary>
         /// Initialise une nouvelle instance de la classe <see cref="TimePeriod"/>.
@@ -51,5 +52,23 @@ namespace QstReport.Utils
         /// La durée de la période.
         /// </summary>
         public TimeSpan Duration { get { return End - Start; } }
+
+        /// <summary>
+        /// Enumère tous les jours de la semaine.
+        /// </summary>
+        public IEnumerable<DateTime> Days
+        {
+            get { return Start.EachDayTo(End); }
+        }
+
+        /// <summary>
+        /// Indique si la date spécifiée est contenue dans la semaine.
+        /// </summary>
+        /// <param name="date">Une date à vérifier.</param>
+        /// <returns>true si la date spcifiée appartient bien à la semaine, false autrement.</returns>
+        public bool ContainsDate(DateTime date)
+        {
+            return (date >= Start) && (date <= End);
+        }
     }
 }

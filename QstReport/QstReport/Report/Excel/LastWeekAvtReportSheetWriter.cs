@@ -23,15 +23,15 @@ namespace QstReport.Report.Excel
         private static readonly string MisoStatusList = "Nominal,Ecart,Auc. Info,Hors ST";
         private static readonly string MisoErrorCodeList = "COOR,ECH,ENV. TECH,MTO,REP,RH,SUR,TECH,TPS";
         
-        public void CreateReport(xL.Worksheet sheet, Week week, IEnumerable<Avt> avts)
+        public void CreateReport(xL.Worksheet sheet, TimePeriod timePeriod, IEnumerable<Avt> avts)
         {
             var rowIndex = 1; // Index de ligne
             var columnsHeader = new string[] { "Ref SIAM", "Ref AVT", "Libellé", "Date début", "Date fin", "MISO", "Bilan", "Code" };
             var columnCount = columnsHeader.Length;
 
-            var reportTitle = string.Format("Bilan des AVT de la semaine n°{0} (du {1:d} au {2:d})", week.WeekNumber, week.Start, week.End);
+            var reportTitle = string.Format("Bilan des AVT pour la période du {0:d} au {1:d})", timePeriod.Start, timePeriod.End);
 
-            var avtForthisWeek = avts.Where(x => week.Contains(x.WorkPeriods.GlobalStart)).ToList(); // TODO : pas la bonne manière de détecter
+            var avtForthisWeek = avts.Where(x => timePeriod.ContainsDate(x.WorkPeriods.GlobalStart)).ToList(); // TODO : pas la bonne manière de détecter
             var uniqueAvtCount = avtForthisWeek.UniqueCount(x => x.RefSiam);
             
             /* Titre de la feuille */

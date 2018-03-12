@@ -46,6 +46,9 @@ namespace QstReport
             _worker.DoWork += DoWork;
             _worker.ProgressChanged += OnProgressChanged;
 
+            CreateRcoReport = true;
+            CreateGsstReport = false;
+
             CreateReportCommand = new RelayCommand(_ => _worker.RunWorkerAsync(), _ => !_worker.IsBusy);
         }
 
@@ -58,7 +61,7 @@ namespace QstReport
         {
             var currentWeek = new Week(DateTime.Now);
             var lastWeek = currentWeek.PreviousWeek();
-
+            
             var reportData = new ReportData { ReportPeriod = new TimePeriod(lastWeek.Start, currentWeek.End) };
 
             _worker.ReportProgress(10, "Connexion à SIAM...");
@@ -115,21 +118,35 @@ namespace QstReport
         /// <summary>
         /// La progression de la tâche.
         /// </summary>
-        private double currentProgress;
+        private double _currentProgress;
         public double CurrentProgress
         {
-            get { return currentProgress; }
-            set { SetProperty(ref currentProgress, value); }
+            get { return _currentProgress; }
+            set { SetProperty(ref _currentProgress, value); }
         }
 
         /// <summary>
         /// La version texte de la progression de la tâche.
         /// </summary>
-        private string currentProgressText;
+        private string _currentProgressText;
         public string CurrentProgressText
         {
-            get { return currentProgressText; }
-            set { SetProperty(ref currentProgressText, value); }
+            get { return _currentProgressText; }
+            set { SetProperty(ref _currentProgressText, value); }
+        }
+
+        private bool _createRcoReport;
+        public bool CreateRcoReport
+        {
+            get { return _createRcoReport; }
+            set { SetProperty(ref _createRcoReport, value); }
+        }
+
+        private bool _createGsstReport;
+        public bool CreateGsstReport
+        {
+            get { return _createGsstReport; }
+            set { SetProperty(ref _createGsstReport, value); }
         }
         
         #region INotifyPropertyChanged Implementation

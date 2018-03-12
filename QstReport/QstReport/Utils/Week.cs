@@ -12,17 +12,18 @@ namespace QstReport.Utils
     /// <summary>
     /// Représente une semaine du calendrier.
     /// </summary>
-    public sealed class Week
+    public sealed class Week : TimePeriod
     {
         /// <summary>
         /// Initialise une nouvelle instance de la classe <see cref="Week"/> à partir d'une date.
         /// </summary>
         /// <param name="dateInWeek">Une date dans la semaine.</param>
         public Week(DateTime dateInWeek)
+            : base(dateInWeek.FirstDateOfWeek(), dateInWeek.LastDateOfWeek())
         {
             WeekNumber = dateInWeek.GetIso8601WeekNumber();
-            Start = dateInWeek.FirstDateOfWeek();
-            End = dateInWeek.LastDateOfWeek();
+            //Start = dateInWeek.FirstDateOfWeek();
+            //End = dateInWeek.LastDateOfWeek();
         }
 
         /// <summary>
@@ -30,38 +31,38 @@ namespace QstReport.Utils
         /// </summary>
         public int WeekNumber { get; private set; }
 
-        /// <summary>
-        /// Une date représentant le début de la semaine (Lundi à 00h00).
-        /// </summary>
-        public DateTime Start { get; private set; }
+        ///// <summary>
+        ///// Une date représentant le début de la semaine (Lundi à 00h00).
+        ///// </summary>
+        //public DateTime Start { get; private set; }
 
-        /// <summary>
-        /// Une date représentant la fin de la semaine (Dimanche à 23h59)
-        /// </summary>
-        public DateTime End { get; private set; }
+        ///// <summary>
+        ///// Une date représentant la fin de la semaine (Dimanche à 23h59)
+        ///// </summary>
+        //public DateTime End { get; private set; }
 
-        /// <summary>
-        /// La durée de la période.
-        /// </summary>
-        public TimeSpan Duration { get { return End - Start; } }
+        ///// <summary>
+        ///// La durée de la période.
+        ///// </summary>
+        //public TimeSpan Duration { get { return End - Start; } }
 
-        /// <summary>
-        /// Enumère tous les jours de la semaine.
-        /// </summary>
-        public IEnumerable<DateTime> Days
-        {
-            get { return Start.EachDayTo(End); }
-        }
+        ///// <summary>
+        ///// Enumère tous les jours de la semaine.
+        ///// </summary>
+        //public IEnumerable<DateTime> Days
+        //{
+        //    get { return Start.EachDayTo(End); }
+        //}
 
-        /// <summary>
-        /// Indique si la date spécifiée est contenue dans la semaine.
-        /// </summary>
-        /// <param name="date">Une date à vérifier.</param>
-        /// <returns>true si la date spcifiée appartient bien à la semaine, false autrement.</returns>
-        public bool Contains(DateTime date)
-        {
-            return (date >= Start) && (date <= End);
-        }
+        ///// <summary>
+        ///// Indique si la date spécifiée est contenue dans la semaine.
+        ///// </summary>
+        ///// <param name="date">Une date à vérifier.</param>
+        ///// <returns>true si la date spcifiée appartient bien à la semaine, false autrement.</returns>
+        //public bool ContainsDate(DateTime date)
+        //{
+        //    return (date >= Start) && (date <= End);
+        //}
 
         /// <summary>
         /// Retourne la semaine suivante du calendrier.
