@@ -102,24 +102,22 @@ namespace QstReport
 
             _worker.ReportProgress(80, "Mise en forme des données...");
 
-            //string reportFileName = string.Format("Bilan QST du {0}.xlsx", currentDataPeriod.Start.ToString("yyyy-MM-dd"));
-            //string reportPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), reportFileName);
 
             var selectedFileName = OpenSaveDialog();
 
-            if(string.IsNullOrEmpty(selectedFileName))
+            if (string.IsNullOrEmpty(selectedFileName))
             {
-                return;
+                _worker.ReportProgress(100, "Opération annulée par l'utilisateur...");
             }
+            else
+            {
+                _worker.ReportProgress(90, "Sauvegarde du rapport...");
+                var reportWriter = new ExcelReportWriter();
+                reportWriter.WriteReport(reportData, selectedFileName);
 
-            _worker.ReportProgress(90, "Sauvegarde du rapport...");
-            var reportWriter = new ExcelReportWriter();
-            //reportWriter.WriteReport(reportData, reportPath);
-            reportWriter.WriteReport(reportData, selectedFileName);
-            
-            _worker.ReportProgress(100, "Ouverture du rapport");
-            //Task.Run(() => Process.Start(reportPath));
-            Task.Run(() => Process.Start(selectedFileName));
+                _worker.ReportProgress(100, "Ouverture du rapport");
+                Task.Run(() => Process.Start(selectedFileName));
+            }
         }
         
         /// <summary>

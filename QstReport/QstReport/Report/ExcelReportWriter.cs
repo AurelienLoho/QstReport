@@ -42,6 +42,7 @@ namespace QstReport.Report
             
             try
             {
+                _xlApp.DisplayAlerts = false;
                 _xlWorkbook.SaveAs(fileName, xL.XlFileFormat.xlOpenXMLWorkbook, Missing.Value, Missing.Value);
                 _xlWorkbook.Close(true, Missing.Value, Missing.Value);
                 _xlApp.Quit();

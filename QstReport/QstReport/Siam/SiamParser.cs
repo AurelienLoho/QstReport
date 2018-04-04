@@ -52,7 +52,7 @@ namespace QstReport.Siam
                     Id = refAvt,
                     RefSiam = refSiam,
                     WorkPeriods = new TimePeriodCollection { new TimePeriod(startDate, endDate) },
-                    Pole = PoleFromRefSiam(refSiam),
+                    Pole = PoleFromRefAvt(refAvt),
                     Entite = EntiteFromRefSiam(refSiam),
                     AvtType = isMiso ? AvtType.MISO : AvtType.AVT,
                     Description = HtmlEntity.DeEntitize(infoNodes[8].InnerText),
@@ -86,7 +86,7 @@ namespace QstReport.Siam
                     Id = refAvt,
                     RefSiam = refSiam,
                     WorkPeriods = timePeriodCollection,
-                    Pole = PoleFromRefSiam(refSiam),
+                    Pole = PoleFromRefAvt(refAvt),
                     Entite = EntiteFromRefSiam(refSiam),
                     AvtType = isMiso ? AvtType.MISO : AvtType.AVT,
                     Description = HtmlEntity.DeEntitize(infoNodes[7].InnerText),
@@ -290,6 +290,18 @@ namespace QstReport.Siam
                 case "tpv":
                 case "rsx":
                 case "sim": return Pole.ATM;
+                default: return Pole.TSV;
+            }
+        }
+
+        private static Pole PoleFromRefAvt(string refSiam)
+        {
+            var pole = refSiam.Substring(0, 3).ToLower();
+
+            switch (pole)
+            {
+                case "cns": return Pole.CNS;
+                case "atm": return Pole.ATM;
                 default: return Pole.TSV;
             }
         }
