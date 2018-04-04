@@ -6,6 +6,7 @@
 
 namespace QstReport
 {
+    using Microsoft.Win32;
     using QstReport.DataModel;
     using QstReport.Epeires;
     using QstReport.Report;
@@ -14,7 +15,6 @@ namespace QstReport
     using System;
     using System.ComponentModel;
     using System.Diagnostics;
-    using System.IO;
     using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using System.Windows.Input;
@@ -24,14 +24,6 @@ namespace QstReport
     /// </summary>
     public sealed class MainViewModel : IDisposable, INotifyPropertyChanged
     {
-        private const string SIAM_URL = "siam.tech.cana.ri";
-        private const string SIAM_USER = "QST";
-        private const string SIAM_PASSWORD = "qstdo";
-
-        private const string EPEIRES_URL = "epeires.cdg-lb.aviation";
-        private const string EPEIRES_USER = "QST";
-        private const string EPEIRES_PASSWORD = "epeires";
-
         /// <summary>
         /// Ordonnanceur de tâches.
         /// </summary>
@@ -83,8 +75,10 @@ namespace QstReport
             var reportData = new ReportData(currentDataPeriod, pastDataPeriod);
 
             _worker.ReportProgress(10, "Connexion à SIAM...");
-
-            using (var siamRepository = new SiamRepository(SIAM_URL, SIAM_USER, SIAM_PASSWORD))
+            
+            using (var siamRepository = new SiamRepository(Properties.Settings.Default.SIAM_HostName,
+                                                           Properties.Settings.Default.SIAM_UserName,
+                                                           Properties.Settings.Default.SIAM_Password))
             {
                 _worker.ReportProgress(20, "Récupération des AVT...");
                 reportData.AvtCollection = siamRepository.GetAvts(StartReportPeriod, EndReportPeriod);
@@ -96,7 +90,9 @@ namespace QstReport
             }
 
             _worker.ReportProgress(40, "Connexion à EPEIRES...");
-            using(var epeiresRepository = new EpeiresRepository(EPEIRES_URL, EPEIRES_USER, EPEIRES_PASSWORD))
+            using(var epeiresRepository = new EpeiresRepository(Properties.Settings.Default.EPEIRES_HostName,
+                                                                Properties.Settings.Default.EPEIRES_UserName,
+                                                                Properties.Settings.Default.EPEIRES_Password))
             {
                 _worker.ReportProgress(50, "Récupération des évènements exploitation...");
                 reportData.ExploitEventCollection = epeiresRepository.GetExploitEvents(pastDataPeriod.Start, pastDataPeriod.End);
@@ -106,15 +102,24 @@ namespace QstReport
 
             _worker.ReportProgress(80, "Mise en forme des données...");
 
-            string reportFileName = string.Format("Bilan QST du {0}.xlsx", currentDataPeriod.Start.ToString("yyyy-MM-dd"));
-            string reportPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), reportFileName);
+            //string reportFileName = string.Format("Bilan QST du {0}.xlsx", currentDataPeriod.Start.ToString("yyyy-MM-dd"));
+            //string reportPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), reportFileName);
+
+            var selectedFileName = OpenSaveDialog();
+
+            if(string.IsNullOrEmpty(selectedFileName))
+            {
+                return;
+            }
 
             _worker.ReportProgress(90, "Sauvegarde du rapport...");
             var reportWriter = new ExcelReportWriter();
-            reportWriter.WriteReport(reportData, reportPath);
+            //reportWriter.WriteReport(reportData, reportPath);
+            reportWriter.WriteReport(reportData, selectedFileName);
             
             _worker.ReportProgress(100, "Ouverture du rapport");
-            Task.Run(() => Process.Start(reportPath));
+            //Task.Run(() => Process.Start(reportPath));
+            Task.Run(() => Process.Start(selectedFileName));
         }
         
         /// <summary>
@@ -181,6 +186,24 @@ namespace QstReport
             var currentPeriod = GetCurrentPeriod();
 
             return new TimePeriod(StartReportPeriod, currentPeriod.Start.AddDays(-1).Date);
+        }
+
+        private string OpenSaveDialog()
+        {
+            var sfd = new SaveFileDialog();
+
+            sfd.InitialDirectory = Properties.Settings.Default.DefaultSavePath ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            sfd.FileName = string.Format("Bilan QST du {0}.xlsx", GetCurrentPeriod().Start.ToString("yyyy-MM-dd"));
+            sfd.CheckFileExists = false;
+
+            var result = sfd.ShowDialog();
+
+            if(result.HasValue && result.Value)
+            {
+                return sfd.FileName;
+            }
+
+            return string.Empty;
         }
         
         #region INotifyPropertyChanged Implementation

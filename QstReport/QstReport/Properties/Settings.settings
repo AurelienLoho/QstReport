@@ -1,7 +1,27 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="QstReport.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="DefaultSavePath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">L:\ST\02-COLLABORATIF\TSV\Domaine QST-DO\_Diffusion interne\0 - Preparation CR</Value>
+    </Setting>
+    <Setting Name="SIAM_UserName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">QST</Value>
+    </Setting>
+    <Setting Name="SIAM_Password" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">qstdo</Value>
+    </Setting>
+    <Setting Name="SIAM_HostName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">siam.tech.cana.ri</Value>
+    </Setting>
+    <Setting Name="EPEIRES_UserName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">QST</Value>
+    </Setting>
+    <Setting Name="EPEIRES_Password" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">epeires</Value>
+    </Setting>
+    <Setting Name="EPEIRES_HostName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">epeires.cdg-lb.aviation</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>
