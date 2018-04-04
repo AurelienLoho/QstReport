@@ -6,18 +6,18 @@
 
 namespace QstReport
 {
+    using QstReport.DataModel;
+    using QstReport.Epeires;
+    using QstReport.Report;
+    using QstReport.Siam;
+    using QstReport.Utils;
     using System;
     using System.ComponentModel;
-    using System.Runtime.CompilerServices;
-    using System.Windows.Input;
-    using QstReport.Utils;
-    using QstReport.DataModel;
-    using QstReport.Siam;
-    using QstReport.Report;
-    using System.Threading.Tasks;
-    using System.IO;
     using System.Diagnostics;
-    using QstReport.Epeires;
+    using System.IO;
+    using System.Runtime.CompilerServices;
+    using System.Threading.Tasks;
+    using System.Windows.Input;
 
     /// <summary>
     /// Le view model principal de l'application.
@@ -30,7 +30,7 @@ namespace QstReport
 
         private const string EPEIRES_URL = "epeires.cdg-lb.aviation";
         private const string EPEIRES_USER = "QST";
-        private const string EPEIRES_PASSWORD = "EpeiresQST";
+        private const string EPEIRES_PASSWORD = "epeires";
 
         /// <summary>
         /// Ordonnanceur de tâches.
@@ -46,10 +46,27 @@ namespace QstReport
             _worker.DoWork += DoWork;
             _worker.ProgressChanged += OnProgressChanged;
 
-            CreateRcoReport = true;
-            CreateGsstReport = false;
-
             CreateReportCommand = new RelayCommand(_ => _worker.RunWorkerAsync(), _ => !_worker.IsBusy);
+            SetCurrentRcoPeriodCommand = new RelayCommand(_ => ComputeCurrentRcoPeriod());
+            SetCurrentGsstPeriodCommand = new RelayCommand(_ => ComputeCurrentGsstPeriod());
+
+            ComputeCurrentRcoPeriod();
+        }
+
+        private void ComputeCurrentGsstPeriod()
+        {
+            var currentWeek = new Week(DateTime.Now);
+
+            StartReportPeriod = currentWeek.PreviousWeek().PreviousWeek().Start;
+            EndReportPeriod = currentWeek.End;
+        }
+
+        private void ComputeCurrentRcoPeriod()
+        {
+            var currentWeek = new Week(DateTime.Now);
+
+            StartReportPeriod = currentWeek.PreviousWeek().Start;
+            EndReportPeriod = currentWeek.End;
         }
 
         /// <summary>
@@ -59,20 +76,21 @@ namespace QstReport
         /// <param name="e"></param>
         public void DoWork(object sender, DoWorkEventArgs e)
         {
-            var currentWeek = new Week(DateTime.Now);
-            var lastWeek = currentWeek.PreviousWeek();
-            
-            var reportData = new ReportData { ReportPeriod = new TimePeriod(lastWeek.Start, currentWeek.End) };
+            //var currentWeek = new Week(DateTime.Now);
+            var currentDataPeriod = GetCurrentPeriod();
+            var pastDataPeriod = GetPastPeriod();
+
+            var reportData = new ReportData(currentDataPeriod, pastDataPeriod);
 
             _worker.ReportProgress(10, "Connexion à SIAM...");
 
             using (var siamRepository = new SiamRepository(SIAM_URL, SIAM_USER, SIAM_PASSWORD))
             {
                 _worker.ReportProgress(20, "Récupération des AVT...");
-                reportData.AvtCollection = siamRepository.GetAvts(reportData.ReportPeriod.Start, reportData.ReportPeriod.End);
+                reportData.AvtCollection = siamRepository.GetAvts(StartReportPeriod, EndReportPeriod);
 
                 _worker.ReportProgress(20, "Récupération des évènements techniques...");
-                reportData.TechEventCollection = siamRepository.GetTechEvents(lastWeek.Start, lastWeek.End);
+                reportData.TechEventCollection = siamRepository.GetTechEvents(pastDataPeriod.Start, pastDataPeriod.End);
 
                 _worker.ReportProgress(30, "Déconnexion de SIAM...");
             }
@@ -81,14 +99,14 @@ namespace QstReport
             using(var epeiresRepository = new EpeiresRepository(EPEIRES_URL, EPEIRES_USER, EPEIRES_PASSWORD))
             {
                 _worker.ReportProgress(50, "Récupération des évènements exploitation...");
-                reportData.ExploitEventCollection = epeiresRepository.GetExploitEvents(lastWeek.Start, lastWeek.End);
+                reportData.ExploitEventCollection = epeiresRepository.GetExploitEvents(pastDataPeriod.Start, pastDataPeriod.End);
 
                 _worker.ReportProgress(60, "Déconnexion de EPEIRES...");
             }
 
             _worker.ReportProgress(80, "Mise en forme des données...");
 
-            string reportFileName = string.Format("Bilan RCO du {0}.xlsx", currentWeek.Start.ToString("yyyy-MM-dd"));
+            string reportFileName = string.Format("Bilan QST du {0}.xlsx", currentDataPeriod.Start.ToString("yyyy-MM-dd"));
             string reportPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), reportFileName);
 
             _worker.ReportProgress(90, "Sauvegarde du rapport...");
@@ -98,7 +116,7 @@ namespace QstReport
             _worker.ReportProgress(100, "Ouverture du rapport");
             Task.Run(() => Process.Start(reportPath));
         }
-
+        
         /// <summary>
         /// Met à jour l'interface utilisateur en fonction de l'avancement des travaux.
         /// </summary>
@@ -114,6 +132,10 @@ namespace QstReport
         /// La commande pour débuter la création du rapport.
         /// </summary>
         public ICommand CreateReportCommand { get; private set; }
+
+        public ICommand SetCurrentRcoPeriodCommand { get; private set; }
+
+        public ICommand SetCurrentGsstPeriodCommand { get; private set; }
 
         /// <summary>
         /// La progression de la tâche.
@@ -135,18 +157,30 @@ namespace QstReport
             set { SetProperty(ref _currentProgressText, value); }
         }
 
-        private bool _createRcoReport;
-        public bool CreateRcoReport
+        private DateTime _startReportPeriod;
+        public DateTime StartReportPeriod
         {
-            get { return _createRcoReport; }
-            set { SetProperty(ref _createRcoReport, value); }
+            get { return _startReportPeriod; }
+            set { SetProperty(ref _startReportPeriod, value); }
         }
 
-        private bool _createGsstReport;
-        public bool CreateGsstReport
+        private DateTime _endReportPeriod;
+        public DateTime EndReportPeriod
         {
-            get { return _createGsstReport; }
-            set { SetProperty(ref _createGsstReport, value); }
+            get { return _endReportPeriod; }
+            set { SetProperty(ref _endReportPeriod, value); }
+        }
+
+        private TimePeriod GetCurrentPeriod()
+        {
+            return new Week(EndReportPeriod);
+        }
+
+        private TimePeriod GetPastPeriod()
+        {
+            var currentPeriod = GetCurrentPeriod();
+
+            return new TimePeriod(StartReportPeriod, currentPeriod.Start.AddDays(-1).Date);
         }
         
         #region INotifyPropertyChanged Implementation

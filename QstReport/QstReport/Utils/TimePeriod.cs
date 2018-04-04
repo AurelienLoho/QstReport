@@ -70,5 +70,13 @@ namespace QstReport.Utils
         {
             return (date >= Start) && (date <= End);
         }
+
+        public static TimePeriod Merge(TimePeriod firstPeriod, TimePeriod secondPeriod)
+        {
+            var minDate = firstPeriod.Start < secondPeriod.Start ? firstPeriod.Start : secondPeriod.Start;
+            var maxDate = firstPeriod.End > secondPeriod.End ? firstPeriod.End : secondPeriod.End;
+
+            return new TimePeriod(minDate, maxDate);
+        }
     }
 }

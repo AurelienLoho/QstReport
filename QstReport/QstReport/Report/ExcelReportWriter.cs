@@ -7,7 +7,6 @@
 namespace QstReport.Report
 {
     using QstReport.DataModel;
-    using QstReport.Utils;
     using System.Reflection;
     using System.Runtime.InteropServices;
     using xL = Microsoft.Office.Interop.Excel;
@@ -24,6 +23,11 @@ namespace QstReport.Report
         /// </summary>
         private xL.Workbook _xlWorkbook;
         
+        /// <summary>
+        /// Crée le rapport au format excel.
+        /// </summary>
+        /// <param name="data">Les données du rapport.</param>
+        /// <param name="fileName">Le nom de fichier du rapport.</param>
         public void WriteReport(ReportData data, string fileName)
         {
             _xlApp = new xL.Application();
@@ -48,49 +52,74 @@ namespace QstReport.Report
             { /* silent fail */ }
         }
 
+        /// <summary>
+        /// Ajoute le planning des AVTs pour la période à venir.
+        /// </summary>
+        /// <param name="data">Les données du rapport.</param>
         private void WriteCurrentWeekAvts(ReportData data)
         {
             var workSheet = CreateNewWorkSheet("AVT Semaine courante", xL.XlPageOrientation.xlPortrait);
 
             var currentWeekAvtWriter = new Excel.CurrentWeekAvtReportSheetWriter();
-            currentWeekAvtWriter.WriteSheetData(workSheet, new Week(data.ReportPeriod.End), data.AvtCollection);
+            currentWeekAvtWriter.WriteSheetData(workSheet, data.CurrentDataPeriod, data.AvtCollection);
         }
 
+        /// <summary>
+        /// Ajoute le bilan des AVTs pour la période passée.
+        /// </summary>
+        /// <param name="data">Les données du rapport.</param>
         private void WritePastWeekAvts(ReportData data)
         {
             var workSheet = CreateNewWorkSheet("AVT Semaine passée", xL.XlPageOrientation.xlPortrait);
 
             var pastWeekAvtWriter = new Excel.LastWeekAvtReportSheetWriter();
-            pastWeekAvtWriter.CreateReport(workSheet, new Week(data.ReportPeriod.Start), data.AvtCollection);
+            pastWeekAvtWriter.CreateReport(workSheet, data.PastDataPeriod, data.AvtCollection);
         }
 
+        /// <summary>
+        /// Ajoute le bilan des évènements techniques pour la période passée.
+        /// </summary>
+        /// <param name="data">Les données du rapport.</param>
         private void WritePastWeekTechEvents(ReportData data)
         {
             var workSheet = CreateNewWorkSheet("Evènements SIAM", xL.XlPageOrientation.xlLandscape);
 
             var pastWeekTechEventWriter = new Excel.LastWeekTechEventsReportSheetWriter();
-            pastWeekTechEventWriter.CreateReport(workSheet, new Week(data.ReportPeriod.Start), data.TechEventCollection);
+            pastWeekTechEventWriter.CreateReport(workSheet, data.PastDataPeriod, data.TechEventCollection);
         }
 
+        /// <summary>
+        /// Ajoute le bilan des évènements exploitation pour la période passée.
+        /// </summary>
+        /// <param name="data">Les données du rapport.</param>
         private void WritePastWeekExploitEvents(ReportData data)
         {
             var workSheet = CreateNewWorkSheet("Evènements Epeires", xL.XlPageOrientation.xlPortrait);
 
             var pastWeekExploitEventWriter = new Excel.LastWeekExploitEventReportSheetWriter();
-            pastWeekExploitEventWriter.CreateReport(workSheet, new Week(data.ReportPeriod.Start), data.ExploitEventCollection);
+            pastWeekExploitEventWriter.CreateReport(workSheet, data.PastDataPeriod, data.ExploitEventCollection);
         }
 
+        /// <summary>
+        /// Ajoute et configue une nouvelle feuille au fichier excel.
+        /// </summary>
+        /// <param name="sheetName">Le nom de la nouvelle feuille.</param>
+        /// <param name="pageOrientation">L'orientation de la feuille pour l'impression.</param>
+        /// <returns>Une nouvelle feuille configurée pour l'impression.</returns>
         private xL.Worksheet CreateNewWorkSheet(string sheetName, xL.XlPageOrientation pageOrientation)
         {
             var workSheet = (xL.Worksheet)_xlWorkbook.Worksheets.Add();
             workSheet.Name = sheetName;
+
             workSheet.PageSetup.Orientation = pageOrientation;
+            
+            // configuration de la mise en page (ajuste toutes les colonnes à une seule page)
             workSheet.PageSetup.Zoom = false;
             workSheet.PageSetup.FitToPagesWide = 1;
             workSheet.PageSetup.FitToPagesTall = false;
-
             workSheet.PageSetup.CenterHorizontally = true;
 
+            // configuration des marges d'impression (valeurs équivalentes aux marges étroites d'excel)
             var leftRightMargin = workSheet.PageSetup.Application.CentimetersToPoints(0.64);
             var topBottomMargin = workSheet.PageSetup.Application.CentimetersToPoints(1.91);
             var headerFooterSize = workSheet.PageSetup.Application.CentimetersToPoints(0.76);

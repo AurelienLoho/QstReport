@@ -26,7 +26,7 @@ namespace QstReport.Report.Excel
         public void CreateReport(xL.Worksheet sheet, TimePeriod timePeriod, IEnumerable<Avt> avts)
         {
             var rowIndex = 1; // Index de ligne
-            var columnsHeader = new string[] { "Ref SIAM", "Ref AVT", "Libellé", "Date début", "Date fin", "MISO", "Bilan", "Code" };
+            var columnsHeader = new string[] { "Ref SIAM", "Ref AVT", "Libellé", "Date début", "Date fin", "MISO", "Bilan", "Code", "LBG" };
             var columnCount = columnsHeader.Length;
 
             var reportTitle = string.Format("Bilan des AVT pour la période du {0:d} au {1:d})", timePeriod.Start, timePeriod.End);
@@ -86,6 +86,8 @@ namespace QstReport.Report.Excel
                         misoErrorCodeCell.Validation.InCellDropdown = true;
                         misoErrorCodeCell.Validation.IgnoreBlank = true;
 
+                        sheet.Cells[rowIndex, 9] = avt.ImpactedAirports.Any(x => x == "LFPB") ? "X" : string.Empty;
+
                         if (avt.IsCancelled)
                         {
                             sheet.Range[sheet.Cells[rowIndex, 1], sheet.Cells[rowIndex, columnCount]].Font.StrikeThrough = true;
@@ -107,12 +109,13 @@ namespace QstReport.Report.Excel
             sheet.Columns[1].ColumnWidth = 16;
             sheet.Columns[2].ColumnWidth = 11;
             sheet.Columns[3].WrapText = true;
-            sheet.Columns[3].ColumnWidth = 56;
+            sheet.Columns[3].ColumnWidth = 50;
             sheet.Columns[4].ColumnWidth = 10.50;
             sheet.Columns[5].ColumnWidth = 10.50;
             sheet.Columns[6].ColumnWidth = 8;
             sheet.Columns[7].ColumnWidth = 10;
             sheet.Columns[8].ColumnWidth = 13;
+            sheet.Columns[9].ColumnWidth = 8;
             
             sheet.Columns[1].HorizontalAlignment = xL.XlHAlign.xlHAlignCenter;
             sheet.Columns[2].HorizontalAlignment = xL.XlHAlign.xlHAlignCenter;
@@ -122,6 +125,7 @@ namespace QstReport.Report.Excel
             sheet.Columns[6].HorizontalAlignment = xL.XlHAlign.xlHAlignCenter;
             sheet.Columns[7].HorizontalAlignment = xL.XlHAlign.xlHAlignCenter;
             sheet.Columns[8].HorizontalAlignment = xL.XlHAlign.xlHAlignCenter;
+            sheet.Columns[9].HorizontalAlignment = xL.XlHAlign.xlHAlignCenter;
 
             // Force rows height to cells content
             sheet.Range[sheet.Cells[1, 1], sheet.Cells[rowIndex, 1]].Rows.AutoFit();

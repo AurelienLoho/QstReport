@@ -1,4 +1,8 @@
-﻿
+﻿/**********************************************************************************************/
+/**** Fichier : RawEpeiresEvent.cs                                                         ****/
+/**** Projet  : QstReport                                                                  ****/
+/**** Auteur  : LOHO Aurélien (SNA-RP/CDG/ST/DO-QST-INS)                                   ****/
+/**********************************************************************************************/
 
 namespace QstReport.Epeires
 {
@@ -6,6 +10,9 @@ namespace QstReport.Epeires
     using System.Collections.Generic;
     using System.Runtime.Serialization;
 
+    /// <summary>
+    /// Les données brutes d'un évèvenement notifié dans EPEIRES.
+    /// </summary>
     [DataContract]
     public sealed class RawEpeiresEvent : IEquatable<RawEpeiresEvent>
     {
@@ -152,6 +159,12 @@ namespace QstReport.Epeires
         /// </summary>
         [DataMember(Name = "fields")]
         public Dictionary<string, string> Fields { get; set; }
+
+        /// <summary>
+        /// Le titre de l'évènement.
+        /// </summary>
+        [DataMember(Name = "title")]
+        public string Title { get; set; }
 
         /// <summary>
         /// 

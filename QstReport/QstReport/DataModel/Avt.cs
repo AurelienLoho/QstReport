@@ -10,6 +10,9 @@ namespace QstReport.DataModel
     using System.Collections.Generic;
     using System.Diagnostics;
 
+    /// <summary>
+    /// Les données conçernant un AVT.
+    /// </summary>
     [DebuggerDisplay("{Id}")]
     public class Avt
     {
