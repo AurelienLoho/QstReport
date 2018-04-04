@@ -1,5 +1,5 @@
 ﻿/**********************************************************************************************/
-/**** Fichier : CurrentWeekAvtReportSheetWriter.cs                                              ****/
+/**** Fichier : CurrentWeekAvtReportSheetWriter.cs                                         ****/
 /**** Projet  : QstReport                                                                  ****/
 /**** Auteur  : LOHO Aurélien (SNA-RP/CDG/ST/DO-QST-INS)                                   ****/
 /**********************************************************************************************/
@@ -27,19 +27,19 @@ namespace QstReport.Report.Excel
         /// </summary>
         private static readonly TimeSpan nightTime = new TimeSpan(19, 0, 0);
 
-        public void WriteSheetData(xL.Worksheet sheet, Week week, IEnumerable<Avt> avts)
+        public void WriteSheetData(xL.Worksheet sheet, TimePeriod period, IEnumerable<Avt> avts)
         {
             var rowIndex = 1; // Index de ligne
             var columnHeaders = new string[] { "Ref SIAM", "Ref AVT", "Libellé", "Heure début", "Heure fin", "LBG" };
             var columnCount = columnHeaders.Length;
-            var sheetTitle = string.Format("Programme des AVT - Semaine n°{0} (du {1:d} au {2:d})", week.WeekNumber, week.Start, week.End);
+            var sheetTitle = string.Format("Programme des AVT pour la période du {0:d} au {1:d}", period.Start, period.End);
 
             var expandedAvts = avts.SelectMany(x =>
                                                     {
                                                         return x.WorkPeriods.SelectMany(t => ExplodeTimePeriod(t))
                                                                             .Select(y => new { Period = y, Avt = x}); 
                                                     })
-                                   .Where(z => week.Contains(z.Period.Starts))
+                                   .Where(z => period.ContainsDate(z.Period.Starts))
                                    .ToList();
 
             var uniqueAvtCount = expandedAvts.Select(x => x.Avt).UniqueCount(y => y.RefSiam);
@@ -49,7 +49,7 @@ namespace QstReport.Report.Excel
 
             /* Nb AVT de la semaine */
             //rowIndex += WriteNumberOfAvt(sheet, rowIndex, uniqueAvtCount);
-            rowIndex += WriteAvtDetailedCount(sheet, rowIndex, columnCount, week, avts);
+            rowIndex += WriteAvtDetailedCount(sheet, rowIndex, columnCount, period, avts);
 
             /* En-tête du tableau */
             rowIndex += WriteTableHeader(sheet, rowIndex, columnHeaders);
@@ -150,9 +150,9 @@ namespace QstReport.Report.Excel
         //    return 2; // 1 ligne écrite + 1 ligne vide
         //}
 
-        private int WriteAvtDetailedCount(xL.Worksheet sheet, int rowIndex, int numOfCOlumns, Week week, IEnumerable<Avt> avts)
+        private int WriteAvtDetailedCount(xL.Worksheet sheet, int rowIndex, int numOfCOlumns, TimePeriod week, IEnumerable<Avt> avts)
         {
-            var uniqueAvts = avts.Where(y => y.WorkPeriods.Any(t => week.Contains(t.Start))).DistinctBy(x => x.RefSiam).ToList();
+            var uniqueAvts = avts.Where(y => y.WorkPeriods.Any(t => week.ContainsDate(t.Start))).DistinctBy(x => x.RefSiam).ToList();
             var totalAvt = uniqueAvts.Count();
             var atmCount = uniqueAvts.Count(x => x.Pole == Pole.ATM);
             var cnsCount = uniqueAvts.Count(x => x.Pole == Pole.CNS);

@@ -23,29 +23,38 @@ namespace QstReport.Epeires
         /// </summary>
         private readonly HttpSessionHandler _httpSession;
 
-        private readonly string _epeiresUrl;
+        /// <summary>
+        /// Le nom d'hôte d'EPEIRES.
+        /// </summary>
+        private readonly string _epeiresHost;
 
         /// <summary>
         /// Initialise une nouvelle instance de la classe <see cref="SiamRepository"/>.
         /// </summary>
-        /// <param name="url">L'URL de SIAM.</param>
+        /// <param name="hostName">Le nom d'hôte de SIAM.</param>
         /// <param name="userName">Le nom d'utilisateur.</param>
         /// <param name="password">Le mot de passe.</param>
-        public EpeiresRepository(string url, string userName, string password)
+        public EpeiresRepository(string hostName, string userName, string password)
         {
-            _epeiresUrl = url;
-            _httpSession = new HttpSessionHandler("epeires.cdg-lb.aviation", false); // TODO : find a way to get host name from url
+            _epeiresHost = hostName;
+            _httpSession = new HttpSessionHandler(hostName, false);
 
             Connect(userName, password);
         }
 
+        /// <summary>
+        /// Récupère l'ensemble des évènements techniques notifiés dans EPEIRES pour la période spécifiée.
+        /// </summary>
+        /// <param name="startDate">Le début de la période de recherche.</param>
+        /// <param name="endDate">La fin de la période de recherche.</param>
+        /// <returns>Une liste d'évènements techniques notifiés</returns>
         public List<ExploitEvent> GetExploitEvents(DateTime startDate, DateTime endDate)
         {
             var evts = new List<RawEpeiresEvent>();
 
-            var url = string.Format("{0}/events/geteventsFC?startdate={1}&enddate={2}", _epeiresUrl,
-                                                                                        startDate.ToString("yyyy-MM-dd"),
-                                                                                        endDate.ToString("yyyy-MM-dd"));
+            var url = string.Format("{0}/events/geteventsFC?start={1}&end={2}", _epeiresHost,
+                                                                                startDate.ToString("yyyy-MM-dd"),
+                                                                                endDate.ToString("yyyy-MM-dd"));
 
             using (var response = _httpSession.SendGetRequest(url))
             {
@@ -56,28 +65,52 @@ namespace QstReport.Epeires
                     evts.AddRange(data);
                 }
             }
-
+            
             return ToExploitEventCollection(evts);
         }
 
+        /// <summary>
+        /// Convertit le modèle de données d'EPEIRES en un modèle plus utilisable.
+        /// </summary>
+        /// <param name="evts">Une liste d'évènements au modèle de données EPEIRES.</param>
+        /// <returns>Une liste d'évènements techniques notifiés dans EPEIRES.</returns>
         private List<ExploitEvent> ToExploitEventCollection(IEnumerable<RawEpeiresEvent> evts)
         {
             return evts.Where(y => y.StatusId != 5) // StatusID = 5 => évènement supprimé
+                       .Where(y => y.CategoryRootId == 9 || y.CategoryRootId == 83 || y.CategoryRootId == 111) // 9 => CDG, 83 => BRIA, 111 => LBG
                        .Select(x =>
                                 {
                                     var fieldArray = x.Fields.Values.ToArray();
+                                    
 
                                     return new ExploitEvent
                                     {
                                         StartDate = x.StartDate,
                                         EndDate = x.EndDate, 
-                                        Title = fieldArray.Length >= 1 ? fieldArray[0] : string.Empty,
-                                        Description = fieldArray.Length >= 2 ? fieldArray[1] : string.Empty
+                                        Title = x.Title, //fieldArray.Length >= 1 ? fieldArray[0] : string.Empty,
+                                        Description = fieldArray.Length >= 2 ? fieldArray[1] : string.Empty,
+                                        AirportCode = LocationFromCategoryId(x.CategoryRootId)
                                     };
                                 })
                        .ToList();
         }
 
+        private string LocationFromCategoryId(int id)
+        {
+            switch(id)
+            {
+                case 9: return "CDG";
+                case 83: return "BRIA";
+                case 111: return "LBG";
+                default: return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Connexion à EPEIRES.
+        /// </summary>
+        /// <param name="userName">Le nom d'utilisateur.</param>
+        /// <param name="password">Le mot de passe.</param>
         private void Connect(string userName, string password)
         {
             try
@@ -85,7 +118,7 @@ namespace QstReport.Epeires
                 // Envoi des informations de login
                 var credentialInfos = string.Format("identity={0}&credential={1}&redirect=application&submit=", userName, password);
 
-                using (var response = _httpSession.SendPostRequest(_epeiresUrl + "/user/login?redirect=application", credentialInfos))
+                using (var response = _httpSession.SendPostRequest(_epeiresHost + "/user/login?redirect=application", credentialInfos))
                 { }
             }
             catch
@@ -94,11 +127,14 @@ namespace QstReport.Epeires
             }
         }
 
+        /// <summary>
+        /// Déconnexion d'EPEIRES.
+        /// </summary>
         private void Disconnect()
         {
             try
             {
-                using (var response = _httpSession.SendGetRequest(_epeiresUrl + "/user/logout?redirect=/"))
+                using (var response = _httpSession.SendGetRequest(_epeiresHost + "/user/logout?redirect=/"))
                 { }
             }
             catch

@@ -6,19 +6,19 @@
 
 namespace QstReport.Siam
 {
+    using QstReport.DataModel;
     using QstReport.Utils;
     using System;
     using System.Collections.Generic;
-    using System.Net.Http;
     using System.Linq;
-    using QstReport.DataModel;
+    using System.Net.Http;
 
     public sealed class SiamRepository : IDisposable
     {
         /// <summary>
-        /// L'URL de SIAM
+        /// Le nom d'hôte de SIAM.
         /// </summary>
-        private readonly string _siamUrl;
+        private readonly string _siamHostName;
 
         /// <summary>
         /// Le gestionnaire de session HTTP.
@@ -28,13 +28,13 @@ namespace QstReport.Siam
         /// <summary>
         /// Initialise une nouvelle instance de la classe <see cref="SiamRepository"/>.
         /// </summary>
-        /// <param name="url">L'URL de SIAM.</param>
+        /// <param name="hostName">Le nom d'hôte de SIAM.</param>
         /// <param name="userName">Le nom d'utilisateur.</param>
         /// <param name="password">Le mot de passe.</param>
-        public SiamRepository(string url, string userName, string password)
+        public SiamRepository(string hostName, string userName, string password)
         {
-            _siamUrl = url;
-            _httpSession = new HttpSessionHandler("siam.tech.cana.ri"); // TODO : find a way to get host name from url
+            _siamHostName = hostName;
+            _httpSession = new HttpSessionHandler(hostName);
 
             Connect(userName, password);
         }
@@ -52,9 +52,15 @@ namespace QstReport.Siam
             return avtIds.Select(x => GetAvtData(x)).ToList();
         }
 
+        /// <summary>
+        /// Récupère les évènements notifiés pendant la période spécifiée.
+        /// </summary>
+        /// <param name="startDate">Le début de la période de recherche.</param>
+        /// <param name="endDate">La fin de la période de recheche.</param>
+        /// <returns>Une collection d'évènements notifiés.</returns>
         public List<TechEvent> GetTechEvents(DateTime startDate, DateTime endDate)
         {
-            var baseUrl = _siamUrl + SiamConstants.MAIN_COURANTE_URL;
+            var baseUrl = _siamHostName + SiamConstants.MAIN_COURANTE_URL;
 
             var events = new List<TechEvent>();
 
@@ -69,7 +75,8 @@ namespace QstReport.Siam
 
                     if (eventNodes == null)
                     {
-                        return new List<TechEvent>();
+                    //    return new List<TechEvent>();
+                        continue;
                     }
 
                     var foundEvents = eventNodes.Select(x => SiamParser.ParseHtmlAsTechEvent(x, day))
@@ -82,9 +89,14 @@ namespace QstReport.Siam
             return events;
         }
 
+        /// <summary>
+        /// Récupère les données d'un AVT à partir de son identifiant dans l'agenda.
+        /// </summary>
+        /// <param name="agendaIndex">L'identifiant de l'AVT dans l'agenda.</param>
+        /// <returns>Les données concernant l'AVT.</returns>
         private Avt GetAvtData(int agendaIndex)
         {
-            var requestUrl = string.Format("{0}/actuel/appli/agenda/?id={1}", _siamUrl, agendaIndex);
+            var requestUrl = string.Format("{0}/actuel/appli/agenda/?id={1}", _siamHostName, agendaIndex);
 
             using (var httpResponse = _httpSession.SendGetRequest(requestUrl))
             {
@@ -92,13 +104,19 @@ namespace QstReport.Siam
             }
         }
 
+        /// <summary>
+        /// Récupère une liste d'identifiants correspondants aux AVTs présents dans l'agenda pendant la période spécifiée.
+        /// </summary>
+        /// <param name="startDate">Le début de la période de recherche.</param>
+        /// <param name="endDate">La fin de la période de recherche.</param>
+        /// <returns>Une collection d'identifiant unique correspondants aux AVTs recherchés.</returns>
         private List<int> GetAvtIds(DateTime startDate, DateTime endDate)
         {
             var avts = new List<Tuple<int, string>>();
 
             foreach (var week in startDate.EachWeekTo(endDate))
             {
-                var requestUrl = string.Format("{0}{1}&select={2}&mode=semaine", _siamUrl, SiamConstants.AGENDA_URL, week.Start.Date.ToString("dd-MM-yyyy"));
+                var requestUrl = string.Format("{0}{1}&select={2}&mode=semaine", _siamHostName, SiamConstants.AGENDA_URL, week.Start.Date.ToString("dd-MM-yyyy"));
 
                 using (var httpResponse = _httpSession.SendGetRequest(requestUrl))
                 {
@@ -112,6 +130,11 @@ namespace QstReport.Siam
                        .ToList();
         }
 
+        /// <summary>
+        /// Connexion à SIAM.
+        /// </summary>
+        /// <param name="userName">Le nom de l'utilisateur.</param>
+        /// <param name="password">Le mot de passe.</param>
         private void Connect(string userName, string password)
         {
             try
@@ -119,7 +142,7 @@ namespace QstReport.Siam
                 // Envoi des informations de login
                 var credentialInfos = string.Format("requete=%2Factuel%2F&erreurOK=1&pseudo={0}&mot_de_passe={1}&submitBtn=", userName, password);
 
-                using (var response = _httpSession.SendPostRequest(_siamUrl + SiamConstants.CONNECT_URL, credentialInfos))
+                using (var response = _httpSession.SendPostRequest(_siamHostName + SiamConstants.CONNECT_URL, credentialInfos))
                 { }
             }
             catch
@@ -128,17 +151,21 @@ namespace QstReport.Siam
             }
         }
 
+
+        /// <summary>
+        /// Déconnexion de SIAM.
+        /// </summary>
         private void Disconnect()
         {
             try
             {
-                using (var response = _httpSession.SendGetRequest(_siamUrl + SiamConstants.DISCONNECT_URL))
+                using (var response = _httpSession.SendGetRequest(_siamHostName + SiamConstants.DISCONNECT_URL))
                 { }
 
                 // confirmation de la déconnexion
                 var disconnectParameters = string.Format("id_utilisateur={0}&confirmer=&deconnexion=1", SiamConstants.USER_ID);
 
-                using (var response = _httpSession.SendPostRequest(_siamUrl + SiamConstants.DISCONNECT_URL, disconnectParameters))
+                using (var response = _httpSession.SendPostRequest(_siamHostName + SiamConstants.DISCONNECT_URL, disconnectParameters))
                 { }
             }
             catch

@@ -19,12 +19,12 @@ namespace QstReport.Report.Excel
 
         private static readonly string[] ColumnsHeader = { "REX", "Significatif", "Ref SIAM", "Heure", "Durée", "Chaîne", "Description" };
 
-        public void CreateReport(xL.Worksheet sheet, Week week, IEnumerable<TechEvent> techEvents)
+        public void CreateReport(xL.Worksheet sheet, TimePeriod period, IEnumerable<TechEvent> techEvents)
         {
             var rowIndex = 1; // Index de ligne
             var columnCount = ColumnsHeader.Length;
 
-            var reportTitle = string.Format("Bilan des évènements reportés dans SIAM pour la semaine n°{0} (du {1:d} au {2:d})", week.WeekNumber, week.Start, week.End);
+            var reportTitle = string.Format("Bilan des évènements reportés dans SIAM pour la période du {0:d} au {1:d}", period.Start, period.End);
 
 
             /* Titre de la feuille */

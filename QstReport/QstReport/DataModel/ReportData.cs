@@ -5,13 +5,32 @@ namespace QstReport.DataModel
     using QstReport.Utils;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     public sealed class ReportData
     {
-        public TimePeriod ReportPeriod { get; set; }
+        public ReportData(TimePeriod currentDataPeriod, TimePeriod pastDataPeriod)
+        {
+            CurrentDataPeriod = currentDataPeriod;
+            PastDataPeriod = pastDataPeriod;
+
+            ReportPeriod = TimePeriod.Merge(pastDataPeriod, currentDataPeriod);
+        }
+
+        public ReportData(DateTime startPeriod, DateTime endPeriod)
+        {
+            //CurrentDataPeriod = currentDataPeriod;
+            //PastDataPeriod = pastDataPeriod;
+
+            ReportPeriod = new TimePeriod(startPeriod, endPeriod);
+            PastDataPeriod = ReportPeriod; // TODO : Compute
+            CurrentDataPeriod = ReportPeriod; // TODO : Compute
+        }
+
+        public TimePeriod ReportPeriod { get; private set; }
+
+        public TimePeriod PastDataPeriod { get; private set; }
+
+        public TimePeriod CurrentDataPeriod { get; private set; }
 
         private List<Avt> _avtCollection = new List<Avt>();
         public List<Avt> AvtCollection

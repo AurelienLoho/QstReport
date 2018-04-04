@@ -83,7 +83,6 @@
     <Compile Include="Report\ExcelReportWriter.cs" />
     <Compile Include="Report\Excel\CoverPageReportSheetWriter.cs" />
     <Compile Include="Report\Excel\CurrentWeekAvtReportSheetWriter.cs" />
-    <Compile Include="Report\Excel\IExcelSheetWriter.cs" />
     <Compile Include="Report\Excel\LastWeekAvtReportSheetWriter.cs" />
     <Compile Include="Report\Excel\LastWeekExploitEventReportSheetWriter.cs" />
     <Compile Include="Report\Excel\LastWeekTechEventsReportSheetWriter.cs" />
@@ -140,6 +139,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\634.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
