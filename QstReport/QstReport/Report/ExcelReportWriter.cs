@@ -39,11 +39,11 @@ namespace QstReport.Report
             WritePastWeekTechEvents(data);
             WritePastWeekAvts(data);
             WriteCurrentWeekAvts(data);
-            
+
             try
             {
                 _xlApp.DisplayAlerts = false;
-                _xlWorkbook.SaveAs(fileName, xL.XlFileFormat.xlOpenXMLWorkbook, Missing.Value, Missing.Value);
+                _xlWorkbook.SaveAs(fileName, xL.XlFileFormat.xlOpenXMLWorkbookMacroEnabled, Missing.Value, Missing.Value);
                 _xlWorkbook.Close(true, Missing.Value, Missing.Value);
                 _xlApp.Quit();
                 Marshal.ReleaseComObject(_xlWorkbook);

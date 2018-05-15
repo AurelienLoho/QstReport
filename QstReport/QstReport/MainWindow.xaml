@@ -15,7 +15,7 @@
             <Setter Property="Margin" Value="2"/>
         </Style>
     </Window.Resources>
-    <Grid Width="400">
+    <Grid Width="450">
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition />
@@ -37,13 +37,14 @@
 
                 <StackPanel Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button Content="Rapport RCO" Command="{Binding SetCurrentRcoPeriodCommand}" Margin="2,2,10,2" FontWeight="Bold" Width="120" Height="30" ToolTip="Rapport pour la semaine courante et la semaine passée."/>
-                    <Button Content="Rapport GSST" Command="{Binding SetCurrentGsstPeriodCommand}" Margin="10,2,2,2" FontWeight="Bold" Width="120" Height="30" ToolTip="Rapport pour la semaine courante et les deux semaiens passées."/>
+                    <Button Content="Rapport GSST" Command="{Binding SetCurrentGsstPeriodCommand}" Margin="5,2,5,2" FontWeight="Bold" Width="120" Height="30" ToolTip="Rapport pour la semaine courante et les deux semaiens passées."/>
+                    <Button Content="Période Libre" Command="{Binding SelectFreePeriodCommand}" Margin="10,2,2,2" FontWeight="Bold" Width="120" Height="30" ToolTip="Choix libre de date de début et de fin."/>
                 </StackPanel>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="Du : " HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold"/>
-                <DatePicker Grid.Column="1" Grid.Row="1" Margin="2" SelectedDate="{Binding StartReportPeriod}" ToolTip="Date de début du rapport"/>
-                <TextBlock Grid.Row="1" Grid.Column="2" Text="Au : " HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" ToolTip="Date de fin du rapport"/>
-                <DatePicker Grid.Column="3" Grid.Row="1" Margin="2" SelectedDate="{Binding EndReportPeriod}"/>
+                <DatePicker Grid.Column="1" Grid.Row="1" Margin="2" SelectedDate="{Binding StartReportPeriod}" ToolTip="Date de début du rapport" IsEnabled="{Binding IsInFreeReportMode}"/>
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="Au : " HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold"/>
+                <DatePicker Grid.Column="3" Grid.Row="1" Margin="2" SelectedDate="{Binding EndReportPeriod}" ToolTip="Date de fin du rapport" IsEnabled="{Binding IsInFreeReportMode}"/>
             </Grid>            
         </GroupBox>
         
@@ -53,12 +54,20 @@
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition />
+                    <RowDefinition />
                 </Grid.RowDefinitions>
                 
-                <ProgressBar Grid.Row="0" Value="{Binding CurrentProgress}" Height="30" Margin="5,2" VerticalAlignment="Center"/>
-                <TextBlock Grid.Row="0" Text="{Binding CurrentProgressText}" FontWeight="Bold" Height="25" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,10,0,2"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Nom du fichier : " Margin="5,2" VerticalAlignment="Center"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ReportFileName}" Height="30" Margin="5,2" VerticalAlignment="Center"/>
+                <ProgressBar Grid.Row="1" Grid.ColumnSpan="2" Value="{Binding CurrentProgress}" Height="30" Margin="5,2" VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding CurrentProgressText}" FontWeight="Bold" Height="25" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,10,0,2"/>
 
-                <Button Grid.Row="1" Content="Générer le rapport" Command="{Binding CreateReportCommand}" Height="40" Width="200" Margin="2" FontWeight="Bold"/>
+                <Button Grid.Row="2" Grid.ColumnSpan="2" Content="Générer le rapport" Command="{Binding CreateReportCommand}" Height="40" Width="200" Margin="2" FontWeight="Bold"/>
             </Grid>
         </GroupBox>
     </Grid>

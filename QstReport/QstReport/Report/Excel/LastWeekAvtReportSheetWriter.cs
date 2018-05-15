@@ -20,7 +20,7 @@ namespace QstReport.Report.Excel
         private static readonly Color SubdivisionHeaderBackgroundColor = Color.DarkGreen;
         private static readonly Color SectionHeaderbackgroundColor = Color.LightGreen;
 
-        private static readonly string MisoStatusList = "Nominal,Ecart,Auc. Info,Hors ST";
+        private static readonly string MisoStatusList = "Nominal,En cours,Ecart,Auc. Info,Hors ST";
         private static readonly string MisoErrorCodeList = "COOR,ECH,ENV. TECH,MTO,REP,RH,SUR,TECH,TPS";
         
         public void CreateReport(xL.Worksheet sheet, TimePeriod timePeriod, IEnumerable<Avt> avts)

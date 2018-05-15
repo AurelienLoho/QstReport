@@ -24,10 +24,14 @@ namespace QstReport
     /// </summary>
     public sealed class MainViewModel : IDisposable, INotifyPropertyChanged
     {
+        private const string DATE_FORMAT = "yyyy-MM-dd";
+
         /// <summary>
         /// Ordonnanceur de tâches.
         /// </summary>
         private BackgroundWorker _worker;
+        
+        private bool _freeReportMode = false;
 
         /// <summary>
         /// Initialise une nouvelle instance de la classe <see cref="ViewModel"/>.
@@ -41,24 +45,43 @@ namespace QstReport
             CreateReportCommand = new RelayCommand(_ => _worker.RunWorkerAsync(), _ => !_worker.IsBusy);
             SetCurrentRcoPeriodCommand = new RelayCommand(_ => ComputeCurrentRcoPeriod());
             SetCurrentGsstPeriodCommand = new RelayCommand(_ => ComputeCurrentGsstPeriod());
+            SelectFreePeriodCommand = new RelayCommand(_ => SelectFreePeriod());
 
             ComputeCurrentRcoPeriod();
         }
 
         private void ComputeCurrentGsstPeriod()
         {
+            _freeReportMode = false;
             var currentWeek = new Week(DateTime.Now);
 
             StartReportPeriod = currentWeek.PreviousWeek().PreviousWeek().Start;
             EndReportPeriod = currentWeek.End;
+            ReportFileName = string.Format("{0} Réunion GSST.xlsm", currentWeek.Start.ToString(DATE_FORMAT));
         }
 
         private void ComputeCurrentRcoPeriod()
         {
+            IsInFreeReportMode = false;
             var currentWeek = new Week(DateTime.Now);
 
             StartReportPeriod = currentWeek.PreviousWeek().Start;
             EndReportPeriod = currentWeek.End;
+            ReportFileName = string.Format("{0} Réunion RCO.xlsm", currentWeek.Start.ToString(DATE_FORMAT));
+        }
+
+        private void SelectFreePeriod()
+        {
+            IsInFreeReportMode = true;
+            OnDateValueChanged();
+        }
+
+        private void OnDateValueChanged()
+        {
+            if (IsInFreeReportMode)
+            {
+                ReportFileName = string.Format("Bilan du {0} au {1}.xlsm", _startReportPeriod.ToString(DATE_FORMAT), _endReportPeriod.ToString(DATE_FORMAT));
+            }
         }
 
         /// <summary>
@@ -140,6 +163,8 @@ namespace QstReport
 
         public ICommand SetCurrentGsstPeriodCommand { get; private set; }
 
+        public ICommand SelectFreePeriodCommand { get; private set; }
+
         /// <summary>
         /// La progression de la tâche.
         /// </summary>
@@ -164,14 +189,39 @@ namespace QstReport
         public DateTime StartReportPeriod
         {
             get { return _startReportPeriod; }
-            set { SetProperty(ref _startReportPeriod, value); }
+            set 
+            {
+                if(SetProperty(ref _startReportPeriod, value))
+                {
+                    OnDateValueChanged();
+                }
+            }
         }
 
         private DateTime _endReportPeriod;
         public DateTime EndReportPeriod
         {
             get { return _endReportPeriod; }
-            set { SetProperty(ref _endReportPeriod, value); }
+            set 
+            { 
+                if(SetProperty(ref _endReportPeriod, value))
+                {
+                    OnDateValueChanged();
+                }
+            }
+        }
+
+        private string _reportFileName;
+        public string ReportFileName
+        {
+            get { return _reportFileName; }
+            set { SetProperty(ref _reportFileName, value); }
+        }
+
+        public bool IsInFreeReportMode
+        {
+            get { return _freeReportMode; }
+            set { SetProperty(ref _freeReportMode, value); }
         }
 
         private TimePeriod GetCurrentPeriod()
@@ -191,7 +241,7 @@ namespace QstReport
             var sfd = new SaveFileDialog();
 
             sfd.InitialDirectory = Properties.Settings.Default.DefaultSavePath ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            sfd.FileName = string.Format("Bilan QST du {0}.xlsx", GetCurrentPeriod().Start.ToString("yyyy-MM-dd"));
+            sfd.FileName = ReportFileName;
             sfd.CheckFileExists = false;
 
             var result = sfd.ShowDialog();
@@ -243,7 +293,7 @@ namespace QstReport
             storage = value;
             RaisePropertyChanged(propertyName);
             return true;
-        }
+        }            
 
         #endregion
 
