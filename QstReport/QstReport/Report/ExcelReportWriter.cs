@@ -7,9 +7,9 @@
 namespace QstReport.Report
 {
     using QstReport.DataModel;
+    using System.Drawing;
     using System.Reflection;
     using System.Runtime.InteropServices;
-    using System.Drawing;
     using xL = Microsoft.Office.Interop.Excel;
 
     public sealed class ExcelReportWriter : IReportWriter
@@ -31,32 +31,6 @@ namespace QstReport.Report
         /// </summary>
         /// <param name="data">Les données du rapport.</param>
         /// <param name="fileName">Le nom de fichier du rapport.</param>
-        //public void WriteReport(ReportData data, string fileName)
-        //{
-        //    WriteReport(data, fileName, Properties.Settings.Default.RCO_Model_File);
-        //    //_xlApp = new xL.Application();
-        //    //_xlWorkbook = _xlApp.Workbooks.Add(Missing.Value);
-
-        //    //// Le dernier onglet ajouté sera le premier à l'ouverture du fichier
-
-        //    //WritePastWeekExploitEvents(data);
-        //    //WritePastWeekTechEvents(data);
-        //    //WritePastWeekAvts(data);
-        //    //WriteCurrentWeekAvts(data);
-
-        //    //try
-        //    //{
-        //    //    _xlApp.DisplayAlerts = false;
-        //    //    _xlWorkbook.SaveAs(fileName, xL.XlFileFormat.xlOpenXMLWorkbookMacroEnabled, Missing.Value, Missing.Value);
-        //    //    _xlWorkbook.Close(true, Missing.Value, Missing.Value);
-        //    //    _xlApp.Quit();
-        //    //    Marshal.ReleaseComObject(_xlWorkbook);
-        //    //    Marshal.ReleaseComObject(_xlApp);
-        //    //}
-        //    //catch
-        //    //{ /* silent fail */ }
-        //}
-
         public void WriteReport(ReportData data, string reportFileName, string reportModelName = null)
         {
             _xlApp = new xL.Application();

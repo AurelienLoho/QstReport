@@ -7,6 +7,7 @@
 namespace QstReport
 {
     using Microsoft.Win32;
+    using QstReport.Configuration;
     using QstReport.DataModel;
     using QstReport.Epeires;
     using QstReport.Report;
@@ -14,6 +15,7 @@ namespace QstReport
     using QstReport.Utils;
     using System;
     using System.ComponentModel;
+    using System.Configuration;
     using System.Diagnostics;
     using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
@@ -33,6 +35,9 @@ namespace QstReport
         
         private bool _freeReportMode = false;
         private bool _isRcoReport = true;
+
+
+        public static readonly AppConfigurationSection globalConfig = ConfigurationManager.GetSection("reportConfig") as AppConfigurationSection;
 
         /// <summary>
         /// Initialise une nouvelle instance de la classe <see cref="ViewModel"/>.
@@ -101,10 +106,10 @@ namespace QstReport
             var reportData = new ReportData(currentDataPeriod, pastDataPeriod);
 
             _worker.ReportProgress(10, "Connexion à SIAM...");
-            
-            using (var siamRepository = new SiamRepository(Properties.Settings.Default.SIAM_HostName,
-                                                           Properties.Settings.Default.SIAM_UserName,
-                                                           Properties.Settings.Default.SIAM_Password))
+
+            using (var siamRepository = new SiamRepository(globalConfig.Siam.HostName,
+                                                           globalConfig.Siam.UserName,
+                                                           globalConfig.Siam.Password))
             {
                 _worker.ReportProgress(20, "Récupération des AVT...");
                 reportData.AvtCollection = siamRepository.GetAvts(StartReportPeriod, EndReportPeriod);
@@ -116,9 +121,9 @@ namespace QstReport
             }
 
             _worker.ReportProgress(40, "Connexion à EPEIRES...");
-            using(var epeiresRepository = new EpeiresRepository(Properties.Settings.Default.EPEIRES_HostName,
-                                                                Properties.Settings.Default.EPEIRES_UserName,
-                                                                Properties.Settings.Default.EPEIRES_Password))
+            using (var epeiresRepository = new EpeiresRepository(globalConfig.Epeires.HostName,
+                                                                globalConfig.Epeires.UserName,
+                                                                globalConfig.Epeires.Password))
             {
                 _worker.ReportProgress(50, "Récupération des évènements exploitation...");
                 reportData.ExploitEventCollection = epeiresRepository.GetExploitEvents(pastDataPeriod.Start, pastDataPeriod.End);
@@ -147,7 +152,7 @@ namespace QstReport
                 }
                 else
                 {
-                    var modelFile = _isRcoReport ? Properties.Settings.Default.RCO_Model_File : Properties.Settings.Default.GSST_Model_File;
+                    var modelFile = _isRcoReport ? globalConfig.Model.RCO : globalConfig.Model.GSST;
                     reportWriter.WriteReport(reportData, selectedFileName, modelFile);
                 }
 
@@ -253,7 +258,7 @@ namespace QstReport
         {
             var sfd = new SaveFileDialog();
 
-            sfd.InitialDirectory = Properties.Settings.Default.DefaultSavePath ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            sfd.InitialDirectory = globalConfig.Save.SaveDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             sfd.FileName = ReportFileName;
             sfd.CheckFileExists = false;
 

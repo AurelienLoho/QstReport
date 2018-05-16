@@ -68,6 +68,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Configuration\AppConfigurationSection.cs" />
+    <Compile Include="Configuration\GeneralConfigurationElement.cs" />
+    <Compile Include="Configuration\ReportModelFileConfigurationElement.cs" />
+    <Compile Include="Configuration\RepositoryConnectionConfigurationElement.cs" />
     <Compile Include="DataModel\Avt.cs" />
     <Compile Include="DataModel\AvtType.cs" />
     <Compile Include="DataModel\Entite.cs" />
@@ -79,7 +83,6 @@
     <Compile Include="Epeires\EpeiresRepository.cs" />
     <Compile Include="Epeires\RawEpeiresEvent.cs" />
     <Compile Include="Report\ExcelReportWriter.cs" />
-    <Compile Include="Report\Excel\CoverPageReportSheetWriter.cs" />
     <Compile Include="Report\Excel\CurrentWeekAvtReportSheetWriter.cs" />
     <Compile Include="Report\Excel\LastWeekAvtReportSheetWriter.cs" />
     <Compile Include="Report\Excel\LastWeekExploitEventReportSheetWriter.cs" />

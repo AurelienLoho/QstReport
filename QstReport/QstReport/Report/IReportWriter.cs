@@ -18,9 +18,6 @@ namespace QstReport.Report
         /// </summary>
         /// <param name="data">Les données du rapport.</param>
         /// <param name="fileName">Le nom de fichier du rapport.</param>
-        //void WriteReport(ReportData data, string fileName);
-
-
         void WriteReport(ReportData data, string reportFileName, string modelFileName);
     }
 }
