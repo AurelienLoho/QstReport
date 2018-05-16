@@ -9,10 +9,13 @@ namespace QstReport.Report
     using QstReport.DataModel;
     using System.Reflection;
     using System.Runtime.InteropServices;
+    using System.Drawing;
     using xL = Microsoft.Office.Interop.Excel;
 
     public sealed class ExcelReportWriter : IReportWriter
     {
+        private static readonly Color DefaultTabColor = Color.LightGray;
+
         /// <summary>
         /// L'application excel.
         /// </summary>
@@ -28,13 +31,46 @@ namespace QstReport.Report
         /// </summary>
         /// <param name="data">Les données du rapport.</param>
         /// <param name="fileName">Le nom de fichier du rapport.</param>
-        public void WriteReport(ReportData data, string fileName)
+        //public void WriteReport(ReportData data, string fileName)
+        //{
+        //    WriteReport(data, fileName, Properties.Settings.Default.RCO_Model_File);
+        //    //_xlApp = new xL.Application();
+        //    //_xlWorkbook = _xlApp.Workbooks.Add(Missing.Value);
+
+        //    //// Le dernier onglet ajouté sera le premier à l'ouverture du fichier
+
+        //    //WritePastWeekExploitEvents(data);
+        //    //WritePastWeekTechEvents(data);
+        //    //WritePastWeekAvts(data);
+        //    //WriteCurrentWeekAvts(data);
+
+        //    //try
+        //    //{
+        //    //    _xlApp.DisplayAlerts = false;
+        //    //    _xlWorkbook.SaveAs(fileName, xL.XlFileFormat.xlOpenXMLWorkbookMacroEnabled, Missing.Value, Missing.Value);
+        //    //    _xlWorkbook.Close(true, Missing.Value, Missing.Value);
+        //    //    _xlApp.Quit();
+        //    //    Marshal.ReleaseComObject(_xlWorkbook);
+        //    //    Marshal.ReleaseComObject(_xlApp);
+        //    //}
+        //    //catch
+        //    //{ /* silent fail */ }
+        //}
+
+        public void WriteReport(ReportData data, string reportFileName, string reportModelName = null)
         {
             _xlApp = new xL.Application();
-            _xlWorkbook = _xlApp.Workbooks.Add(Missing.Value);
+
+            if (string.IsNullOrEmpty(reportModelName))
+            {
+                _xlWorkbook = _xlApp.Workbooks.Add(Missing.Value);
+            }
+            else
+            {
+                _xlWorkbook = _xlApp.Workbooks.Open(reportModelName);
+            }
 
             // Le dernier onglet ajouté sera le premier à l'ouverture du fichier
-
             WritePastWeekExploitEvents(data);
             WritePastWeekTechEvents(data);
             WritePastWeekAvts(data);
@@ -43,14 +79,17 @@ namespace QstReport.Report
             try
             {
                 _xlApp.DisplayAlerts = false;
-                _xlWorkbook.SaveAs(fileName, xL.XlFileFormat.xlOpenXMLWorkbookMacroEnabled, Missing.Value, Missing.Value);
+                _xlWorkbook.SaveAs(reportFileName, xL.XlFileFormat.xlWorkbookNormal, Missing.Value, Missing.Value);                
+            }
+            catch
+            { /* silent fail */ }
+            finally
+            {
                 _xlWorkbook.Close(true, Missing.Value, Missing.Value);
                 _xlApp.Quit();
                 Marshal.ReleaseComObject(_xlWorkbook);
                 Marshal.ReleaseComObject(_xlApp);
             }
-            catch
-            { /* silent fail */ }
         }
 
         /// <summary>
@@ -109,8 +148,10 @@ namespace QstReport.Report
         /// <returns>Une nouvelle feuille configurée pour l'impression.</returns>
         private xL.Worksheet CreateNewWorkSheet(string sheetName, xL.XlPageOrientation pageOrientation)
         {
-            var workSheet = (xL.Worksheet)_xlWorkbook.Worksheets.Add();
+            var firstSheet = _xlWorkbook.Worksheets[1];
+            var workSheet = (xL.Worksheet)_xlWorkbook.Worksheets.Add(Missing.Value, firstSheet);
             workSheet.Name = sheetName;
+            workSheet.Tab.Color = DefaultTabColor.ToArgb(); 
 
             workSheet.PageSetup.Orientation = pageOrientation;
             

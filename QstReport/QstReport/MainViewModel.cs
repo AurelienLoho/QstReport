@@ -32,6 +32,7 @@ namespace QstReport
         private BackgroundWorker _worker;
         
         private bool _freeReportMode = false;
+        private bool _isRcoReport = true;
 
         /// <summary>
         /// Initialise une nouvelle instance de la classe <see cref="ViewModel"/>.
@@ -53,21 +54,23 @@ namespace QstReport
         private void ComputeCurrentGsstPeriod()
         {
             _freeReportMode = false;
+            _isRcoReport = false;
             var currentWeek = new Week(DateTime.Now);
 
             StartReportPeriod = currentWeek.PreviousWeek().PreviousWeek().Start;
             EndReportPeriod = currentWeek.End;
-            ReportFileName = string.Format("{0} Réunion GSST.xlsm", currentWeek.Start.ToString(DATE_FORMAT));
+            ReportFileName = string.Format("{0} Réunion GSST.xls", currentWeek.Start.ToString(DATE_FORMAT));
         }
 
         private void ComputeCurrentRcoPeriod()
         {
             IsInFreeReportMode = false;
+            _isRcoReport = true;
             var currentWeek = new Week(DateTime.Now);
 
             StartReportPeriod = currentWeek.PreviousWeek().Start;
             EndReportPeriod = currentWeek.End;
-            ReportFileName = string.Format("{0} Réunion RCO.xlsm", currentWeek.Start.ToString(DATE_FORMAT));
+            ReportFileName = string.Format("{0} Réunion RCO.xls", currentWeek.Start.ToString(DATE_FORMAT));
         }
 
         private void SelectFreePeriod()
@@ -80,7 +83,7 @@ namespace QstReport
         {
             if (IsInFreeReportMode)
             {
-                ReportFileName = string.Format("Bilan du {0} au {1}.xlsm", _startReportPeriod.ToString(DATE_FORMAT), _endReportPeriod.ToString(DATE_FORMAT));
+                ReportFileName = string.Format("Bilan du {0} au {1}.xls", _startReportPeriod.ToString(DATE_FORMAT), _endReportPeriod.ToString(DATE_FORMAT));
             }
         }
 
@@ -134,9 +137,19 @@ namespace QstReport
             }
             else
             {
-                _worker.ReportProgress(90, "Sauvegarde du rapport...");
+                _worker.ReportProgress(90, "Sauvegarde du rapport...");                        
+
                 var reportWriter = new ExcelReportWriter();
-                reportWriter.WriteReport(reportData, selectedFileName);
+
+                if (IsInFreeReportMode)
+                {
+                    reportWriter.WriteReport(reportData, selectedFileName);
+                }
+                else
+                {
+                    var modelFile = _isRcoReport ? Properties.Settings.Default.RCO_Model_File : Properties.Settings.Default.GSST_Model_File;
+                    reportWriter.WriteReport(reportData, selectedFileName, modelFile);
+                }
 
                 _worker.ReportProgress(100, "Ouverture du rapport");
                 Task.Run(() => Process.Start(selectedFileName));

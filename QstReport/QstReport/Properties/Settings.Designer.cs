@@ -85,5 +85,25 @@ namespace QstReport.Properties {
                 return ((string)(this["EPEIRES_HostName"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("L:\\ST\\02-COLLABORATIF\\TSV\\Domaine QST-DO\\0 - Modèles de références\\Date - Réunion" +
+            " Coordination Opérationnelle - base.xls")]
+        public string RCO_Model_File {
+            get {
+                return ((string)(this["RCO_Model_File"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("L:\\ST\\02-COLLABORATIF\\TSV\\Domaine QST-DO\\0 - Modèles de références\\Date - Réunion" +
+            " GSST- base.xls")]
+        public string GSST_Model_File {
+            get {
+                return ((string)(this["GSST_Model_File"]));
+            }
+        }
     }
 }

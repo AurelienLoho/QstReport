@@ -23,5 +23,11 @@
     <Setting Name="EPEIRES_HostName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">epeires.cdg-lb.aviation</Value>
     </Setting>
+    <Setting Name="RCO_Model_File" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">L:\ST\02-COLLABORATIF\TSV\Domaine QST-DO\0 - Modèles de références\Date - Réunion Coordination Opérationnelle - base.xls</Value>
+    </Setting>
+    <Setting Name="GSST_Model_File" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">L:\ST\02-COLLABORATIF\TSV\Domaine QST-DO\0 - Modèles de références\Date - Réunion GSST- base.xls</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

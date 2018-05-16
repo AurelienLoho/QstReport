@@ -76,7 +76,6 @@
     <Compile Include="DataModel\ReportData.cs" />
     <Compile Include="DataModel\Superviseur.cs" />
     <Compile Include="DataModel\TechEvent.cs" />
-    <Compile Include="Epeires\EpeiresConstants.cs" />
     <Compile Include="Epeires\EpeiresRepository.cs" />
     <Compile Include="Epeires\RawEpeiresEvent.cs" />
     <Compile Include="Report\ExcelReportWriter.cs" />
