@@ -120,7 +120,7 @@ namespace QstReport.Utils
             request.AllowAutoRedirect = false;
             request.CookieContainer = _cookieJar;
             request.KeepAlive = false;
-
+            
             return request;
         }
     }

@@ -2,6 +2,7 @@
 
 namespace QstReport.DataModel
 {
+    using QstReport.Siam5;
     using QstReport.Utils;
     using System;
     using System.Collections.Generic;
@@ -38,6 +39,13 @@ namespace QstReport.DataModel
             get { return _avtCollection; }
             set { _avtCollection = value; }
         }
+
+        //private List<Siam5Avt> _siam5AvtCollection = new List<Siam5Avt>();
+        //public List<Siam5Avt> Siam5AvtCollection
+        //{
+        //    get { return _siam5AvtCollection; }
+        //    set { _siam5AvtCollection = value; }
+        //}
 
         private List<TechEvent> _techEventCollection = new List<TechEvent>();
         public List<TechEvent> TechEventCollection

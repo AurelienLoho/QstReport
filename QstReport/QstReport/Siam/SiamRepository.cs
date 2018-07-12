@@ -50,7 +50,7 @@ namespace QstReport.Siam
             var avtIds = GetAvtIds(startDate, endDate);
 
             return avtIds.Select(x => GetAvtData(x)).ToList();
-        }
+        }      
 
         /// <summary>
         /// Récupère les évènements notifiés pendant la période spécifiée.

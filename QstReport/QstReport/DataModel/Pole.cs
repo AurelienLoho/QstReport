@@ -21,5 +21,8 @@ namespace QstReport.DataModel
 
         [Display(Name = "Pôle Transverse", ShortName = "TSV")]
         TSV,
+
+        [Display(Name = "Inconnu", ShortName = "N/A")]
+        Unknown,
     }
 }

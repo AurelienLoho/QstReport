@@ -107,18 +107,31 @@ namespace QstReport
 
             _worker.ReportProgress(10, "Connexion à SIAM...");
 
-            using (var siamRepository = new SiamRepository(globalConfig.Siam.HostName,
-                                                           globalConfig.Siam.UserName,
-                                                           globalConfig.Siam.Password))
+            using(var siam5Repository = new Siam5.Repository(globalConfig.SiamV5.HostName,
+                                                             globalConfig.SiamV5.UserName,
+                                                             globalConfig.SiamV5.Password))
             {
                 _worker.ReportProgress(20, "Récupération des AVT...");
-                reportData.AvtCollection = siamRepository.GetAvts(StartReportPeriod, EndReportPeriod);
+                reportData.AvtCollection = siam5Repository.GetAvts(StartReportPeriod, EndReportPeriod);
 
                 _worker.ReportProgress(20, "Récupération des évènements techniques...");
-                reportData.TechEventCollection = siamRepository.GetTechEvents(pastDataPeriod.Start, pastDataPeriod.End);
+                reportData.TechEventCollection = siam5Repository.GetTechEvents(pastDataPeriod.Start, pastDataPeriod.End);
 
                 _worker.ReportProgress(30, "Déconnexion de SIAM...");
             }
+
+            //using (var siamRepository = new SiamRepository(globalConfig.Siam.HostName,
+            //                                               globalConfig.Siam.UserName,
+            //                                               globalConfig.Siam.Password))
+            //{                
+                //_worker.ReportProgress(20, "Récupération des AVT...");
+                //reportData.AvtCollection = siamRepository.GetAvts(StartReportPeriod, EndReportPeriod);
+
+            //    _worker.ReportProgress(20, "Récupération des évènements techniques...");
+            //    reportData.TechEventCollection = siamRepository.GetTechEvents(pastDataPeriod.Start, pastDataPeriod.End);
+
+            //    _worker.ReportProgress(30, "Déconnexion de SIAM...");
+            //}
 
             _worker.ReportProgress(40, "Connexion à EPEIRES...");
             using (var epeiresRepository = new EpeiresRepository(globalConfig.Epeires.HostName,

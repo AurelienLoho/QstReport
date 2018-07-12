@@ -17,6 +17,13 @@ namespace QstReport.Configuration
             set { this["siam"] = value; }
         }
 
+        [ConfigurationProperty("siamV5", IsRequired = true)]
+        public RepositoryConnectionConfigurationElement SiamV5
+        {
+            get { return (RepositoryConnectionConfigurationElement)this["siamV5"]; }
+            set { this["siamV5"] = value; }
+        }
+
         [ConfigurationProperty("epeires", IsRequired=true)]
         public RepositoryConnectionConfigurationElement Epeires
         {

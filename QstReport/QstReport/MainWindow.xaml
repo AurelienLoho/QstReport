@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:QstReport"
         mc:Ignorable="d"
-        Title="Bilan hebdomadaire QST V3.3"
+        Title="Bilan hebdomadaire QST V4.0 (essais avec siam V5)"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen"
         Icon="Images/634.png">

@@ -89,7 +89,12 @@
     <Compile Include="Report\Excel\LastWeekTechEventsReportSheetWriter.cs" />
     <Compile Include="Report\IReportWriter.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="Siam5\Siam5Constants.cs" />
+    <Compile Include="Siam5\Siam5AvtData.cs" />
+    <Compile Include="Siam5\Parser.cs" />
+    <Compile Include="Siam5\Repository.cs" />
     <Compile Include="Siam\SiamConstants.cs" />
+    <Compile Include="Siam5\SiamHttpSessionHandler.cs" />
     <Compile Include="Siam\SiamParser.cs" />
     <Compile Include="Siam\SiamRepository.cs" />
     <Compile Include="Utils\DateTimeExtensions.cs" />
