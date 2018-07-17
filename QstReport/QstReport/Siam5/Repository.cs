@@ -1,4 +1,10 @@
-﻿namespace QstReport.Siam5
+﻿/**********************************************************************************************/
+/**** Fichier : Siam5/Repository.cs                                                        ****/
+/**** Projet  : QstReport                                                                  ****/
+/**** Auteur  : LOHO Aurélien (SNA-RP/CDG/ST/DO-QST-INS)                                   ****/
+/**********************************************************************************************/
+
+namespace QstReport.Siam5
 {
     using HtmlAgilityPack;
     using QstReport.DataModel;
@@ -7,12 +13,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
-    using System.Text;
 
     public sealed class Repository : IDisposable
     {
-        private const string formDataDelimeter = "-----------------------------195142331314649";
-
         /// <summary>
         /// Le nom d'hôte de SIAM.
         /// </summary>
@@ -37,12 +40,18 @@
             Connect(userName, password);
         }
 
+        /// <summary>
+        /// Récupère la liste des Avis de Travaux notifiés dans SIAM.
+        /// </summary>
+        /// <param name="startDate">Le début de la période de recherche.</param>
+        /// <param name="endDate">La fin de la période de recherche.</param>
+        /// <returns>Une collection d'AVT notifiés.</returns>
         public List<Avt> GetAvts(DateTime startDate, DateTime endDate)
         {
             var avts = new List<Avt>();
 
-            var requestUrl = string.Format("{0}{1}", _siamHostName, Siam5Constants.AGENDA_URL);
-            var requestData = FormatAvtSearchPostData(startDate, endDate);
+            var requestUrl = string.Format("{0}{1}", _siamHostName, Constants.AGENDA_URL);
+            var requestData = FormatSearchPostData(startDate, endDate, "PLN");
 
             using (var httpResponse = _httpSession.SendPostRequest(requestUrl, requestData))
             {
@@ -53,27 +62,37 @@
 
                 foreach (var t in uniqueRefs)
                 {
-                    var detailRequest = string.Format("{0}{1}{2}", _siamHostName, Siam5Constants.AVT_DETAIL_URL, t.id_occurrence);
+                    var detailRequest = string.Format("{0}{1}{2}", _siamHostName, Constants.AVT_DETAIL_URL, t.id_occurrence);
 
                     using (var detailResponse = _httpSession.SendDetailAvtRequest(detailRequest))
                     {
                         var avt = Parser.ParseHtmlAsAvt(detailResponse.AsHtml());
-                        avt.RefSiam= t.id;
 
-                        avts.Add(avt);
+                        if (avt != null)
+                        {
+                            avt.RefSiam = t.id;
+
+                            avts.Add(avt);
+                        }
                     }
                 }
             }
-
+            
             return avts;
         }
 
+        /// <summary>
+        /// Récupère la liste des évènements notifiés dans SIAM V5.
+        /// </summary>
+        /// <param name="startDate">Le début de la période de recherche.</param>
+        /// <param name="endDate">La fin de la période de recherche.</param>
+        /// <returns>Une collection d'évènements notifiés.</returns>
         public List<TechEvent> GetTechEvents(DateTime startDate, DateTime endDate)
         {
             var events = new List<TechEvent>();
 
-            var requestUrl = string.Format("{0}{1}", _siamHostName, Siam5Constants.EVENTS_URL);
-            var requestData = FormatTechEventSearchPostData(startDate, endDate);
+            var requestUrl = string.Format("{0}{1}", _siamHostName, Constants.EVENTS_URL);
+            var requestData = FormatSearchPostData(startDate, endDate, "DBK");
 
             using(var httpResponse = _httpSession.SendPostRequest(requestUrl, requestData))
             {
@@ -96,8 +115,18 @@
         {
             try
             {
-                var requestData = GetConnectRequestPostData(userName, password);
-                using (var response = _httpSession.SendConnectRequest(_siamHostName + Siam5Constants.CONNECT_URL, requestData))
+                var parameters = new Dictionary<string, string>
+                                        {
+                                            { "form_button", "submitBtn"},
+                                            {"source", "ACC"},
+                                            {"mode", "search"},
+                                            {"uri", "//actuel//"},
+                                            {"action", "authenticate"},
+                                            {"pseudo", userName },
+                                            { "mot_de_passe", password },
+                                        };
+
+                using (var response = _httpSession.SendConnectRequest(_siamHostName + Constants.CONNECT_URL, parameters))
                 {
                 }
             }
@@ -115,8 +144,15 @@
         {
             try
             {
-                var requestData = GetDisconnectRequestPostData();
-                using (var response = _httpSession.SendDisconnectRequest(_siamHostName + Siam5Constants.CONNECT_URL, requestData))
+                var parameters = new Dictionary<string, string>
+                                        {
+                                            { "form_button", "submitBtn"},
+                                            {"source", "ATH"},
+                                            {"mode", "search"},
+                                            {"action", "doLogout"},
+                                        };
+
+                using (var response = _httpSession.SendDisconnectRequest(_siamHostName + Constants.CONNECT_URL, parameters))
                 {
                 }
             }
@@ -126,67 +162,11 @@
             }
         }
 
-        public string GetConnectRequestPostData(string userName, string password)
+        private string FormatSearchPostData(DateTime periodStart, DateTime periodEnd, string sourceData)
         {
-            StringBuilder sb = new StringBuilder();
-
-            const string delimeter = "-----------------------------195142331314649\r\nContent-Disposition: form-data; name=\"{0}\"\r\n\r\n{1}\r\n";
-
-            sb.AppendFormat(delimeter, "form_button", "submitBtn");
-            sb.AppendFormat(delimeter, "source", "ACC");
-            sb.AppendFormat(delimeter, "mode", "search");
-            sb.AppendFormat(delimeter, "uri", "//actuel//");
-            sb.AppendFormat(delimeter, "action", "authenticate");
-            sb.AppendFormat(delimeter, "pseudo", userName);
-            sb.AppendFormat(delimeter, "mot_de_passe", password);
-            sb.AppendFormat(delimeter, "action", "authenticate");
-
-            sb.Append("-----------------------------195142331314649--");
-
-            return sb.ToString();
-        }
-
-        public string GetDisconnectRequestPostData()
-        {
-            StringBuilder sb = new StringBuilder();
-
-            const string delimeter = "-----------------------------195142331314649\r\nContent-Disposition: form-data; name=\"{0}\"\r\n\r\n{1}\r\n";
-
-            sb.AppendFormat(delimeter, "form_button", "submitBtn");
-            sb.AppendFormat(delimeter, "source", "ATH");
-            sb.AppendFormat(delimeter, "mode", "search");
-            sb.AppendFormat(delimeter, "action", "doLogout");
-            sb.AppendFormat(delimeter, "action", "doLogout");
-
-            sb.Append("-----------------------------195142331314649--");
-
-            return sb.ToString();
-        }
-
-        public string FormatAvtSearchPostData(DateTime periodStart, DateTime periodEnd)
-        {
-            //StringBuilder sb = new StringBuilder();
-
-            //sb.Append("&mode=search");
-            //sb.Append("&refiners=refiner_window|refiner_toManage|refiner_moduletypes|refiner_sites-1|refiner_chains|refiner_managers-1|refiner_tags|refiner_reference|refiner_keywords|refiner_date|refiner_sites-2|refiner_managers-2|refiner_supervisions|refiner_colors");
-            //sb.AppendFormat("&refiner_window={0};{1};-1;months;-0;days", periodStart.ToString("dd/MM/YYYY"), periodEnd.ToString("dd/MM/YYYY"));
-            //sb.Append("&refiner_moduletypes=TVX");
-            ////sb.Append("&refiner_sites-1=");
-            //sb.AppendFormat("&refiner_date={0}", DateTime.Now.ToString("dd/MM/YYYY"));
-            //sb.Append("&refiner_colors=statusCS");
-            //sb.Append("&search_itemsPerPage=200");
-            //sb.Append("&search_order=ASC");
-            //sb.Append("&source=PLN");
-
-            //return sb.ToString();
-
-            return "mode=search&refiners=refiner_window%7Crefiner_toManage%7Crefiner_moduletypes%7Crefiner_sites-1%7Crefiner_chains%7Crefiner_managers-1%7Crefiner_tags%7Crefiner_reference%7Crefiner_keywords%7Crefiner_date%7Crefiner_sites-2%7Crefiner_managers-2%7Crefiner_supervisions%7Crefiner_colors&refiner_window=16%2F07%2F2018%3B22%2F07%2F2018%3B-1%3Bmonths%3B-0%3Bdays&refiner_moduletypes=&refiner_sites-1=&refiner_managers-1=&refiner_tags=&refiner_date=10%2F07%2F2018&refiner_sites-2=&refiner_managers-2=&refiner_supervisions=&refiner_colors=statusCS&search_dateRef=&search_totalItems=&search_itemsPerPage=30&search_order=ASC&source=PLN";
-        }
-
-        private string FormatTechEventSearchPostData(DateTime periodStart, DateTime periodEnd)
-        {
-            return "mode=search&refiners=refiner_window%7Crefiner_toManage%7Crefiner_moduletypes%7Crefiner_sites-1%7Crefiner_chains%7Crefiner_managers-1%7Crefiner_tags%7Crefiner_reference%7Crefiner_keywords%7Crefiner_date%7Crefiner_sites-2%7Crefiner_managers-2%7Crefiner_supervisions%7Crefiner_colors&refiner_window=12%2F04%2F2018%3B12%2F07%2F2018%3B-1%3Bmonths%3B-0%3Bdays&refiner_moduletypes=&refiner_sites-1=&refiner_managers-1=&refiner_tags=&refiner_date=10%2F07%2F2018&refiner_sites-2=&refiner_managers-2=&refiner_supervisions=&refiner_colors=statusCS&search_dateRef=&search_totalItems=&search_itemsPerPage=30&search_order=ASC&source=DBK";
-        
+            var requestFormat = "mode=search&refiners=refiner_window%7Crefiner_toManage%7Crefiner_moduletypes%7Crefiner_sites-1%7Crefiner_chains%7Crefiner_managers-1%7Crefiner_tags%7Crefiner_reference%7Crefiner_keywords%7Crefiner_date%7Crefiner_sites-2%7Crefiner_managers-2%7Crefiner_supervisions%7Crefiner_colors&refiner_window={0}%3B{1}%3B-1%3Bmonths%3B-0%3Bdays&refiner_moduletypes=&refiner_sites-1=&refiner_managers-1=&refiner_tags=&refiner_date=10%2F07%2F2018&refiner_sites-2=&refiner_managers-2=&refiner_supervisions=&refiner_colors=statusCS&search_dateRef=&search_totalItems=&search_itemsPerPage=300&search_order=ASC&source={2}";
+            
+            return HtmlEntity.Entitize(string.Format(requestFormat, periodStart.ToString("dd/MM/yyyy"), periodEnd.ToString("dd/MM/yyyy"), sourceData));
         }
 
         private TechEvent ToTechEvent(Siam5EventData eventData)

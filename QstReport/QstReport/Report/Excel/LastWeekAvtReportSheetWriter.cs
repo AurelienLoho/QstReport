@@ -31,8 +31,8 @@ namespace QstReport.Report.Excel
 
             var reportTitle = string.Format("Bilan des AVT pour la période du {0:d} au {1:d})", timePeriod.Start, timePeriod.End);
 
-            var avtForthisWeek = avts.Where(x => timePeriod.ContainsDate(x.WorkPeriods.GlobalStart)).ToList(); // TODO : pas la bonne manière de détecter
-            var uniqueAvtCount = avtForthisWeek.UniqueCount(x => x.RefSiam);
+            var avtForthisPeriod = avts.Where(x => timePeriod.ContainsDate(x.WorkPeriods.GlobalEnd)).ToList(); // TODO : pas la bonne manière de détecter
+            var uniqueAvtCount = avtForthisPeriod.UniqueCount(x => x.RefSiam);
             
             /* Titre de la feuille */
             rowIndex += WritePageTitle(sheet, rowIndex, columnCount, reportTitle);
@@ -44,7 +44,7 @@ namespace QstReport.Report.Excel
             rowIndex += WriteTableHeader(sheet, rowIndex, columnsHeader);
 
             /* Affichage par subdivision */
-            var groupedBy = avtForthisWeek.GroupBy(x => x.Pole).OrderBy(x => x.Key);
+            var groupedBy = avtForthisPeriod.GroupBy(x => x.Pole).OrderBy(x => x.Key);
             foreach (var group in groupedBy)
             {
                 /* Nom de la subdivision */

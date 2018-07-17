@@ -1,12 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+﻿/**********************************************************************************************/
+/**** Fichier : Siam5/SiamHttpSessionHandler.cs                                            ****/
+/**** Projet  : QstReport                                                                  ****/
+/**** Auteur  : LOHO Aurélien (SNA-RP/CDG/ST/DO-QST-INS)                                   ****/
+/**********************************************************************************************/
 
 namespace QstReport.Siam5
 {
+    using System.Collections.Generic;
+    using System.Net;
+    using System.Text;
+
     public sealed class SiamHttpSessionHandler
     {
         /// <summary>
@@ -21,16 +24,13 @@ namespace QstReport.Siam5
 
         private readonly bool _useHttps = true;
 
+        private const string formDataDelimeter = "-----------------------------195142331314649";
+
         /// <summary>
         /// Initialise une nouvelle instance de la classe <see cref="HttpSessionHandler"/>.
         /// </summary>
         /// <param name="hostName">Le nom de l'hôte.</param>
-        public SiamHttpSessionHandler(string hostName)
-        {
-            _hostName = hostName;
-        }
-
-        public SiamHttpSessionHandler(string hostName, bool useHttps)
+        public SiamHttpSessionHandler(string hostName, bool useHttps = true)
         {
             _hostName = hostName;
             _useHttps = useHttps;
@@ -123,7 +123,7 @@ namespace QstReport.Siam5
             return request;
         }
 
-        public HttpWebResponse SendConnectRequest(string url, string requestData)
+        public HttpWebResponse SendConnectRequest(string url, Dictionary<string, string> requestParams)
         {
             HttpWebRequest request = WebRequest.CreateHttp("https://" + url);
             request.Method = "POST";
@@ -137,6 +137,8 @@ namespace QstReport.Siam5
             request.Referer = "https://siam5.tech.cana.ri/actuel/";
             request.Headers.Add("X-Requested-With", "XMLHttpRequest");
 
+            var requestData = FormatRequestData(requestParams);
+
             var dataBytes = Encoding.ASCII.GetBytes(requestData);
             request.ContentLength = dataBytes.Length;
 
@@ -148,7 +150,7 @@ namespace QstReport.Siam5
             return (HttpWebResponse)request.GetResponse();
         }
 
-        public HttpWebResponse SendDisconnectRequest(string url, string requestData)
+        public HttpWebResponse SendDisconnectRequest(string url, Dictionary<string, string> requestParams)
         {
             HttpWebRequest request = WebRequest.CreateHttp("https://" + url);
             request.Method = "POST";
@@ -161,6 +163,8 @@ namespace QstReport.Siam5
             request.KeepAlive = true;
             request.Referer = "https://siam5.tech.cana.ri/actuel/lib/core/auth/?action=logout";
             request.Headers.Add("X-Requested-With", "XMLHttpRequest");
+
+            var requestData = FormatRequestData(requestParams);
 
             var dataBytes = Encoding.ASCII.GetBytes(requestData);
             request.ContentLength = dataBytes.Length;
@@ -185,6 +189,22 @@ namespace QstReport.Siam5
             request.KeepAlive = true;
 
             return (HttpWebResponse)request.GetResponse();
+        }
+
+        private string FormatRequestData(Dictionary<string, string> parameters)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            const string delimeter = formDataDelimeter + "\r\nContent-Disposition: form-data; name=\"{0}\"\r\n\r\n{1}\r\n";
+
+            foreach (var entry in parameters)
+            {
+                sb.AppendFormat(delimeter, entry.Key, entry.Value);
+            }
+
+            sb.Append(formDataDelimeter + "--");
+
+            return sb.ToString();
         }
     }
 }

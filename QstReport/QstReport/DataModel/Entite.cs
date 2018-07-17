@@ -52,7 +52,7 @@ namespace QstReport.DataModel
         [Display(Name = "Moyens généraux", ShortName = "MG")]
         MoyensGeneraux,
 
-        [Display(Name = "Inconnu", ShortName= "N/A")]
+        [Display(Name = "Autres", ShortName= "Autres")]
         Unknown,
     }
 }

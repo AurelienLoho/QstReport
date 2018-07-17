@@ -1,11 +1,8 @@
 ﻿<Window x:Class="QstReport.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:QstReport"
-        mc:Ignorable="d"
-        Title="Bilan hebdomadaire QST V4.0 (essais avec siam V5)"
+        Title="Bilan hebdomadaire QST V4.0"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen"
         Icon="Images/634.png">
@@ -14,6 +11,8 @@
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Margin" Value="2"/>
         </Style>
+        
+        <local:InverseBooleanConverter x:Key="inverseBooleanConverter"/>
     </Window.Resources>
     <Grid Width="450">
         <Grid.RowDefinitions>
@@ -24,6 +23,7 @@
         <GroupBox Grid.Column="0" Grid.Row="0" Header="Dates du rapport :">
             <Grid>
                 <Grid.RowDefinitions>
+                    <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
@@ -45,6 +45,12 @@
                 <DatePicker Grid.Column="1" Grid.Row="1" Margin="2" SelectedDate="{Binding StartReportPeriod}" ToolTip="Date de début du rapport" IsEnabled="{Binding IsInFreeReportMode}"/>
                 <TextBlock Grid.Row="1" Grid.Column="2" Text="Au : " HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold"/>
                 <DatePicker Grid.Column="3" Grid.Row="1" Margin="2" SelectedDate="{Binding EndReportPeriod}" ToolTip="Date de fin du rapport" IsEnabled="{Binding IsInFreeReportMode}"/>
+                
+                <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal">
+                    <TextBlock Text="Source de données : " VerticalAlignment="Center"/>
+                    <RadioButton Content="Siam V4" Margin="7,5,5,5" VerticalAlignment="Center" IsChecked="{Binding UseSiamV5, Converter={StaticResource inverseBooleanConverter}}"/>
+                    <RadioButton Content="Siam V5" Margin="5" VerticalAlignment="Center" IsChecked="{Binding UseSiamV5}"/>
+                </StackPanel>
             </Grid>            
         </GroupBox>
         

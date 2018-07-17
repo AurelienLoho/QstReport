@@ -1,4 +1,10 @@
-﻿namespace QstReport.Siam5
+﻿/**********************************************************************************************/
+/**** Fichier : Siam5/Parser.cs                                                            ****/
+/**** Projet  : QstReport                                                                  ****/
+/**** Auteur  : LOHO Aurélien (SNA-RP/CDG/ST/DO-QST-INS)                                   ****/
+/**********************************************************************************************/
+
+namespace QstReport.Siam5
 {
     using HtmlAgilityPack;
     using QstReport.DataModel;
@@ -21,6 +27,12 @@
             var rawTitle = HtmlEntity.DeEntitize(dataNode.SelectSingleNode("//h2[@class='alignCenter']").InnerText.Trim());
 
             var splitIndex = rawTitle.IndexOf(']');
+
+            if(splitIndex == -1)
+            {
+                return null;
+            }
+
             avt.Id = rawTitle.Substring(1, splitIndex - 1);
             avt.Title = rawTitle.Substring(splitIndex + 1).TrimStart();
 
@@ -31,6 +43,7 @@
             avt.Entite = GetOriginEntity(dataNode);
             avt.Pole = PoleFromEntity(avt.Entite);
             avt.AvtType = HasMiso(dataNode) ? AvtType.MISO : AvtType.AVT;
+            avt.IsCancelled = GetCancelledStatus(dataNode);
 
             return avt;
         }
@@ -47,6 +60,11 @@
             var text = dataNode.SelectSingleNode("//div[@id='occ']//legend[contains(text(),'Analyse')]/following::div").InnerText;
 
             return HtmlEntity.DeEntitize(text);
+        }
+
+        private static bool GetCancelledStatus(HtmlNode dataNode)
+        {
+            return dataNode.SelectSingleNode("//p[@class='status3']") != null;
         }
 
         private static List<string> ParseLocation(HtmlNode dataNode)
@@ -111,7 +129,7 @@
                 var text = HtmlEntity.DeEntitize(singlePeriodNode.InnerText).Trim();
 
                 var start = text.Substring(0, 16);
-                var end = text.Substring(16);
+                var end = text.Substring(16,16);
 
                 var period = new TimePeriod(DateTime.Parse(start), DateTime.Parse(end));
 
@@ -140,6 +158,15 @@
                 case "traitement radar": { return Entite.TraitementRadar; }
                 case "radionavigation": { return Entite.Radionavigation; }
                 case "installations": { return Entite.Installations; }
+                case "qst do": { return Entite.QualiteDeService; }
+                case "simulation et supervision": { return Entite.SimulationSupervision; }
+                case "traitement plans de vols": { return Entite.TraitementPlanDeVol; }
+                case "energie et climatisation": { return Entite.EnergieClimatisation; }
+                case "radars": { return Entite.Radars; }
+                case "radio téléphone": { return Entite.RadioTelephone; }
+                case "réseaux": { return Entite.Reseaux; }
+                case "instruction": { return Entite.Instruction; }
+                case "informatique bureautique": { return Entite.Bureautique; }
                 default: { return Entite.Unknown; }
             }
         }
