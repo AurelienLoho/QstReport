@@ -30,7 +30,7 @@ namespace QstReport.Report.Excel
         public void WriteSheetData(xL.Worksheet sheet, TimePeriod period, IEnumerable<Avt> avts)
         {
             var rowIndex = 1; // Index de ligne
-            var columnHeaders = new string[] { "Ref SIAM", "Ref AVT", "Libellé", "Heure début", "Heure fin", "LBG" };
+            var columnHeaders = new string[] { "Entité", "Ref AVT", "Libellé", "Heure début", "Heure fin", "LBG" };
             var columnCount = columnHeaders.Length;
             var sheetTitle = string.Format("Programme des AVT pour la période du {0:d} au {1:d}", period.Start, period.End);
 
@@ -64,6 +64,7 @@ namespace QstReport.Report.Excel
                 rowIndex += WriteTableSubHeader(sheet, rowIndex, columnCount, group.Key.ToString("dddd d MMMM"));
 
                 var dayAvts = group.Where(x => x.Period.Starts.TimeOfDay < nightTime).OrderBy(x => x.Avt.Pole).ThenBy(x => x.Avt.Entite);
+
                 var nightAvts = group.Where(x => x.Period.Starts.TimeOfDay >= nightTime).OrderBy(x => x.Avt.Pole).ThenBy(x => x.Avt.Entite);
 
                 // AVT de la journée
@@ -138,18 +139,7 @@ namespace QstReport.Report.Excel
 
             return 1;
         }
-
-        //private int WriteNumberOfAvt(xL.Worksheet sheet, int rowIndex, long numberOfAvt)
-        //{
-        //    sheet.Cells[rowIndex, 1].Font.Bold = true;
-        //    sheet.Cells[rowIndex, 1].HorizontalALignment = xL.XlHAlign.xlHAlignRight;
-        //    sheet.Cells[rowIndex, 1] = "Nb AVT : ";
-        //    sheet.Cells[rowIndex, 2].Font.Bold = true;
-        //    sheet.Cells[rowIndex, 2] = numberOfAvt;
-
-        //    return 2; // 1 ligne écrite + 1 ligne vide
-        //}
-
+        
         private int WriteAvtDetailedCount(xL.Worksheet sheet, int rowIndex, int numOfCOlumns, TimePeriod week, IEnumerable<Avt> avts)
         {
             var uniqueAvts = avts.Where(y => y.WorkPeriods.Any(t => week.ContainsDate(t.Start))).DistinctBy(x => x.RefSiam).ToList();
@@ -254,7 +244,7 @@ namespace QstReport.Report.Excel
         private string[] FormatAvtData(WorkPeriod period, Avt avt)
         {
             return new string[] {
-                            avt.RefSiam,
+                            avt.Entite.GetDisplayName(),
                             avt.Id,
                             avt.Title,
                             "'" + (period.StartsBefore ? "<<<" : period.Starts.ToShortTimeString()),

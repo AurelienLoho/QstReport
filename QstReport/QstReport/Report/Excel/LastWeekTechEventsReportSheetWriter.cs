@@ -48,7 +48,7 @@ namespace QstReport.Report.Excel
                     sheet.Cells[rowIndex, 1] = techEvent.RexAsked ? "X" : string.Empty;
                     sheet.Cells[rowIndex, 2] = string.Empty; // TODO : dropdown list pour sélectionner significatif
                     sheet.Cells[rowIndex, 3] = techEvent.ReferenceSiam;
-                    sheet.Cells[rowIndex, 4] = "'" + techEvent.StartDate.ToString("hh:mm");
+                    sheet.Cells[rowIndex, 4] = "'" + techEvent.StartDate.ToString("HH:mm");
                     sheet.Cells[rowIndex, 5] = techEvent.CalculatedDuration;
                     sheet.Cells[rowIndex, 6] = techEvent.Group;
                     sheet.Cells[rowIndex, 7] = techEvent.Title;

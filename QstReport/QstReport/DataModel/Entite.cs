@@ -16,13 +16,13 @@ namespace QstReport.DataModel
         [Display(Name = "Traitement Radar", ShortName = "TR")]
         TraitementRadar,
 
-        [Display(Name = "Traitement Plan de vol", ShortName = "TPV")]
+        [Display(Name = "Traitement PLN", ShortName = "TPV")]
         TraitementPlanDeVol,
 
-        [Display(Name = "Simulation / Supervision", ShortName = "SIMU")]
+        [Display(Name = "Simulation", ShortName = "SIMU")]
         SimulationSupervision,
 
-        [Display(Name = "Energie / Climatisation", ShortName = "NRJ")]
+        [Display(Name = "Energie / Clim", ShortName = "NRJ")]
         EnergieClimatisation,
 
         [Display(Name = "Radio / Téléphone", ShortName = "RADIO")]
@@ -40,7 +40,7 @@ namespace QstReport.DataModel
         [Display(Name = "Radars", ShortName = "RADAR")]
         Radars,
 
-        [Display(Name = "Qualité de service technique", ShortName = "QST")]
+        [Display(Name = "QST", ShortName = "QST")]
         QualiteDeService,
 
         [Display(Name = "Instruction", ShortName = "INS")]
