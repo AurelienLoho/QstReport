@@ -17,7 +17,7 @@ namespace QstReport.Report.Excel
         private static readonly Color TableHeaderBackgroundColor = Color.LightGray;
         private static readonly Color DayHeaderBackgroundColor = Color.AliceBlue;
 
-        private static readonly string[] ColumnsHeader = { "REX", "Significatif", "Ref SIAM", "Heure", "Durée", "Chaîne", "Description" };
+        private static readonly string[] ColumnsHeader = { "Significatif", "Ref SIAM", "Heure", "Durée", "Chaîne", "Description" };
 
         public void CreateReport(xL.Worksheet sheet, TimePeriod period, IEnumerable<TechEvent> techEvents)
         {
@@ -45,13 +45,13 @@ namespace QstReport.Report.Excel
 
                 foreach (var techEvent in group.OrderBy(x => x.ReferenceSiam))
                 {
-                    sheet.Cells[rowIndex, 1] = techEvent.RexAsked ? "X" : string.Empty;
-                    sheet.Cells[rowIndex, 2] = string.Empty; // TODO : dropdown list pour sélectionner significatif
-                    sheet.Cells[rowIndex, 3] = techEvent.ReferenceSiam;
-                    sheet.Cells[rowIndex, 4] = "'" + techEvent.StartDate.ToString("HH:mm");
-                    sheet.Cells[rowIndex, 5] = techEvent.CalculatedDuration;
-                    sheet.Cells[rowIndex, 6] = techEvent.Group;
-                    sheet.Cells[rowIndex, 7] = techEvent.Title;
+                    AddImagesToCell(sheet, sheet.Cells[rowIndex, 1], techEvent.RexAsked, techEvent.Jamming, techEvent.Telecom);
+
+                    sheet.Cells[rowIndex, 2] = techEvent.ReferenceSiam;
+                    sheet.Cells[rowIndex, 3] = "'" + techEvent.StartDate.ToString("HH:mm");
+                    sheet.Cells[rowIndex, 4] = techEvent.CalculatedDuration;
+                    sheet.Cells[rowIndex, 5] = techEvent.Group;
+                    sheet.Cells[rowIndex, 6] = techEvent.Title;
 
                     sheet.Range[sheet.Cells[rowIndex, 1], sheet.Cells[rowIndex, columnCount]].BorderAround(xL.XlLineStyle.xlContinuous);
                     sheet.Range[sheet.Cells[rowIndex, 1], sheet.Cells[rowIndex, columnCount]].Borders.Item(xL.XlBordersIndex.xlInsideVertical).LineStyle = xL.XlLineStyle.xlContinuous;
@@ -69,23 +69,21 @@ namespace QstReport.Report.Excel
             /* Mise en page finale */
 
             // pour faciliter l'impression la largeur des colonnes est fixée
-            sheet.Columns[1].ColumnWidth = 5;
+            sheet.Columns[1].ColumnWidth = 11;
             sheet.Columns[2].ColumnWidth = 11;
             sheet.Columns[3].ColumnWidth = 9;
-            sheet.Columns[4].ColumnWidth = 6;
-            sheet.Columns[5].ColumnWidth = 9;
+            sheet.Columns[4].ColumnWidth = 9;
+            sheet.Columns[5].WrapText = true;
+            sheet.Columns[5].ColumnWidth = 30;
             sheet.Columns[6].WrapText = true;
-            sheet.Columns[6].ColumnWidth = 30;
-            sheet.Columns[7].WrapText = true;
-            sheet.Columns[7].ColumnWidth = 90;
+            sheet.Columns[6].ColumnWidth = 90;
             
             sheet.Columns[1].HorizontalAlignment = xL.XlHAlign.xlHAlignCenter;
             sheet.Columns[2].HorizontalAlignment = xL.XlHAlign.xlHAlignCenter;
             sheet.Columns[3].HorizontalAlignment = xL.XlHAlign.xlHAlignCenter;
             sheet.Columns[4].HorizontalAlignment = xL.XlHAlign.xlHAlignCenter;
             sheet.Columns[5].HorizontalAlignment = xL.XlHAlign.xlHAlignCenter;
-            sheet.Columns[6].HorizontalAlignment = xL.XlHAlign.xlHAlignCenter;
-            sheet.Columns[7].HorizontalAlignment = xL.XlHAlign.xlHAlignLeft;
+            sheet.Columns[6].HorizontalAlignment = xL.XlHAlign.xlHAlignLeft;
 
             // Force rows height to cells content
             sheet.Range[sheet.Cells[1, 1], sheet.Cells[rowIndex, 1]].Rows.AutoFit();
@@ -152,6 +150,46 @@ namespace QstReport.Report.Excel
             sheet.Cells[rowIndex, 1] = text;
 
             return 1; // 1 ligne écrite
+        }
+
+        //private void AddImageToCell(xL.Worksheet sheet, xL.Range cell, string imagePath)
+        //{
+        //    float Left = (float)((double)cell.Left);
+        //    float Top = (float)((double)cell.Top);
+        //    const float ImageSize = 16;
+        //    sheet.Shapes.AddPicture(imagePath, Microsoft.Office.Core.MsoTriState.msoFalse, Microsoft.Office.Core.MsoTriState.msoCTrue, Left, Top, ImageSize, ImageSize);
+        //    cell.RowHeight = ImageSize + 2;
+        //}
+
+        private void AddImagesToCell(xL.Worksheet sheet, xL.Range cell, bool rex, bool jamming, bool telecom)
+        {
+            const float ImageSize = 16;
+            const string jammingIcon = "//Images//brouillage16.png";
+            const string telecomIcon = "//Images//telecom16.png";
+            const string rexIcon = "//Images//rex.png";
+
+            float Left = (float)((double)cell.Left);
+            float Top = (float)((double)cell.Top);
+
+            if(rex)
+            {
+                sheet.Shapes.AddPicture(Environment.CurrentDirectory + rexIcon, Microsoft.Office.Core.MsoTriState.msoFalse, Microsoft.Office.Core.MsoTriState.msoCTrue, Left, Top, ImageSize, ImageSize);
+                Left += ImageSize + 2;
+            }
+
+            if (jamming)
+            {
+                sheet.Shapes.AddPicture(Environment.CurrentDirectory + jammingIcon, Microsoft.Office.Core.MsoTriState.msoFalse, Microsoft.Office.Core.MsoTriState.msoCTrue, Left, Top, ImageSize, ImageSize);
+                Left += ImageSize + 2;
+            }
+
+            if (telecom)
+            {
+                sheet.Shapes.AddPicture(Environment.CurrentDirectory + telecomIcon, Microsoft.Office.Core.MsoTriState.msoFalse, Microsoft.Office.Core.MsoTriState.msoCTrue, Left, Top, ImageSize, ImageSize);
+                Left += ImageSize + 2;
+            }
+
+            cell.RowHeight = ImageSize + 2;
         }
     }
 }

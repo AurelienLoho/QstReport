@@ -51,6 +51,12 @@ namespace QstReport.DataModel
         /// </summary>
         public bool RexAsked { get; set; }
 
+
+        public bool Jamming { get; set; }
+
+
+        public bool Telecom { get; set; }
+
         /// <summary>
         /// Indique si l'évènement a été jugé important.
         /// </summary>

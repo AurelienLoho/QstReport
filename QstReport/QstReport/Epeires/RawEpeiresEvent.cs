@@ -6,6 +6,7 @@
 
 namespace QstReport.Epeires
 {
+    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using System.Runtime.Serialization;
@@ -157,8 +158,13 @@ namespace QstReport.Epeires
         /// <summary>
         /// 
         /// </summary>
+        //[DataMember(Name = "fields")]
+        //[JsonConverter(typeof(FieldArrayJsonConverter))]
+        //public Dictionary<string, string> Fields { get; set; }
+
         [DataMember(Name = "fields")]
-        public Dictionary<string, string> Fields { get; set; }
+        [JsonConverter(typeof(FieldArrayJsonConverter))]
+        public EpeiresFields EpeiresFields { get; set; }
 
         /// <summary>
         /// Le titre de l'évènement.
@@ -220,6 +226,41 @@ namespace QstReport.Epeires
         public static bool operator !=(RawEpeiresEvent left, RawEpeiresEvent right)
         {
             return !(left == right);
+        }
+    }
+
+    public class EpeiresFields
+    {
+        //[DataMember(Name = "Titre")]
+        //public string Titre { get; set; }
+
+        [DataMember(Name = "Remarque(s)")]
+        public string Remarks { get; set; }
+
+        [DataMember(Name = "Remarques")]
+        public string Remarks2 { get; set; }
+
+        [DataMember(Name = "Observations")]
+        public string Observations { get; set; }
+
+        public string Description
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(Remarks))
+                {
+                    return Remarks;
+                }
+                if (!string.IsNullOrEmpty(Remarks2))
+                {
+                    return Remarks2;
+                }
+                if (!string.IsNullOrEmpty(Observations))
+                {
+                    return Observations;
+                }
+                return string.Empty;
+            }
         }
     }
 }

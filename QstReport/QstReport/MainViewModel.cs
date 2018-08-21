@@ -18,6 +18,7 @@ namespace QstReport
     using System.Diagnostics;
     using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
+    using System.Windows;
     using System.Windows.Input;
 
     /// <summary>
@@ -108,45 +109,66 @@ namespace QstReport
 
             if (UseSiamV5)
             {
-
-                using (var siam5Repository = new Siam5.Repository(globalConfig.SiamV5.HostName,
-                                                                 globalConfig.SiamV5.UserName,
-                                                                 globalConfig.SiamV5.Password))
+                try
                 {
-                    _worker.ReportProgress(20, "Récupération des AVT...");
-                    reportData.AvtCollection = siam5Repository.GetAvts(StartReportPeriod, EndReportPeriod);
+                    using (var siam5Repository = new Siam5.Repository(globalConfig.SiamV5.HostName,
+                                                                     globalConfig.SiamV5.UserName,
+                                                                     globalConfig.SiamV5.Password))
+                    {
+                        _worker.ReportProgress(20, "Récupération des AVT...");
+                        reportData.AvtCollection = siam5Repository.GetAvts(StartReportPeriod, EndReportPeriod);
 
-                    _worker.ReportProgress(20, "Récupération des évènements techniques...");
-                    reportData.TechEventCollection = siam5Repository.GetTechEvents(pastDataPeriod.Start, pastDataPeriod.End);
+                        _worker.ReportProgress(20, "Récupération des évènements techniques...");
+                        reportData.TechEventCollection = siam5Repository.GetTechEvents(pastDataPeriod.Start, pastDataPeriod.End);
 
-                    _worker.ReportProgress(30, "Déconnexion de SIAM...");
+                        _worker.ReportProgress(30, "Déconnexion de SIAM...");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Une erreur est survenue pendant la récupération des données depuis SIAM V5. Le compte-rendu ne contiendra aucune données SIAM V5.\r\n\r\n" + ex.Message, "Erreur de lecture SIAM V5");
                 }
             }
             else
             {
-                using (var siamRepository = new Siam4.Repository(globalConfig.Siam.HostName,
-                                                               globalConfig.Siam.UserName,
-                                                               globalConfig.Siam.Password))
+                try
                 {
-                    _worker.ReportProgress(20, "Récupération des AVT...");
-                    reportData.AvtCollection = siamRepository.GetAvts(StartReportPeriod, EndReportPeriod);
+                    using (var siamRepository = new Siam4.Repository(globalConfig.Siam.HostName,
+                                                                   globalConfig.Siam.UserName,
+                                                                   globalConfig.Siam.Password))
+                    {
+                        _worker.ReportProgress(20, "Récupération des AVT...");
+                        reportData.AvtCollection = siamRepository.GetAvts(StartReportPeriod, EndReportPeriod);
 
-                    _worker.ReportProgress(20, "Récupération des évènements techniques...");
-                    reportData.TechEventCollection = siamRepository.GetTechEvents(pastDataPeriod.Start, pastDataPeriod.End);
+                        _worker.ReportProgress(20, "Récupération des évènements techniques...");
+                        reportData.TechEventCollection = siamRepository.GetTechEvents(pastDataPeriod.Start, pastDataPeriod.End);
 
-                    _worker.ReportProgress(30, "Déconnexion de SIAM...");
+                        _worker.ReportProgress(30, "Déconnexion de SIAM...");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Une erreur est survenue pendant la récupération des données depuis SIAM V4. Le compte-rendu ne contiendra aucune données SIAM V4.\r\n\r\n" + ex.Message, "Erreur de lecture SIAM V4");
                 }
             }
 
             _worker.ReportProgress(40, "Connexion à EPEIRES...");
-            using (var epeiresRepository = new EpeiresRepository(globalConfig.Epeires.HostName,
-                                                                globalConfig.Epeires.UserName,
-                                                                globalConfig.Epeires.Password))
-            {
-                _worker.ReportProgress(50, "Récupération des évènements exploitation...");
-                reportData.ExploitEventCollection = epeiresRepository.GetExploitEvents(pastDataPeriod.Start, pastDataPeriod.End);
 
-                _worker.ReportProgress(60, "Déconnexion de EPEIRES...");
+            try
+            {
+                using (var epeiresRepository = new EpeiresRepository(globalConfig.Epeires.HostName,
+                                                                    globalConfig.Epeires.UserName,
+                                                                    globalConfig.Epeires.Password))
+                {
+                    _worker.ReportProgress(50, "Récupération des évènements exploitation...");
+                    reportData.ExploitEventCollection = epeiresRepository.GetExploitEvents(pastDataPeriod.Start, pastDataPeriod.End);
+
+                    _worker.ReportProgress(60, "Déconnexion de EPEIRES...");
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("Une erreur est survenue pendant la récupération des données depuis EPEIRES. Le compte-rendu ne contiendra aucune données EPEIRES.\r\n\r\n" + ex.Message, "Erreur de lecture EPEIRES");
             }
 
             _worker.ReportProgress(80, "Mise en forme des données...");

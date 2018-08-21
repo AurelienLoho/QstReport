@@ -81,6 +81,7 @@
     <Compile Include="DataModel\Superviseur.cs" />
     <Compile Include="DataModel\TechEvent.cs" />
     <Compile Include="Epeires\EpeiresRepository.cs" />
+    <Compile Include="Epeires\FieldArrayJsonConverter.cs" />
     <Compile Include="Epeires\RawEpeiresEvent.cs" />
     <Compile Include="Report\ExcelReportWriter.cs" />
     <Compile Include="Report\Excel\CurrentWeekAvtReportSheetWriter.cs" />
@@ -153,6 +154,33 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\rex.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="Microsoft.Office.Core">
+      <Guid>{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>5</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\brouillage16.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Images\telecom16.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\site.cdg.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -20,7 +20,7 @@ namespace QstReport.Siam5
         /// Le nom d'hôte de SIAM.
         /// </summary>
         private readonly string _siamHostName;
-        
+
         /// <summary>
         /// Le gestionnaire de session HTTP.
         /// </summary>
@@ -77,7 +77,7 @@ namespace QstReport.Siam5
                     }
                 }
             }
-            
+
             return avts;
         }
 
@@ -94,17 +94,17 @@ namespace QstReport.Siam5
             var requestUrl = string.Format("{0}{1}", _siamHostName, Constants.EVENTS_URL);
             var requestData = FormatSearchPostData(startDate, endDate, "DBK");
 
-            using(var httpResponse = _httpSession.SendPostRequest(requestUrl, requestData))
+            using (var httpResponse = _httpSession.SendPostRequest(requestUrl, requestData))
             {
                 var result = httpResponse.AsJson<Siam5RequestResult<Siam5EventData>>();
 
-                foreach(var item in result.success.items)
+                foreach (var item in result.success.items)
                 {
                     events.Add(ToTechEvent(item));
                 }
             }
 
-            return events;
+            return events.Where(x => !x.Modified).ToList();
         }
 
         /// Connexion à SIAM.
@@ -165,7 +165,7 @@ namespace QstReport.Siam5
         private string FormatSearchPostData(DateTime periodStart, DateTime periodEnd, string sourceData)
         {
             var requestFormat = "mode=search&refiners=refiner_window%7Crefiner_toManage%7Crefiner_moduletypes%7Crefiner_sites-1%7Crefiner_chains%7Crefiner_managers-1%7Crefiner_tags%7Crefiner_reference%7Crefiner_keywords%7Crefiner_date%7Crefiner_sites-2%7Crefiner_managers-2%7Crefiner_supervisions%7Crefiner_colors&refiner_window={0}%3B{1}%3B-1%3Bmonths%3B-0%3Bdays&refiner_moduletypes=&refiner_sites-1=&refiner_managers-1=&refiner_tags=&refiner_date=10%2F07%2F2018&refiner_sites-2=&refiner_managers-2=&refiner_supervisions=&refiner_colors=statusCS&search_dateRef=&search_totalItems=&search_itemsPerPage=300&search_order=ASC&source={2}";
-            
+
             return HtmlEntity.Entitize(string.Format(requestFormat, periodStart.ToString("dd/MM/yyyy"), periodEnd.ToString("dd/MM/yyyy"), sourceData));
         }
 
@@ -173,16 +173,85 @@ namespace QstReport.Siam5
         {
             var htmlDoc = new HtmlAgilityPack.HtmlDocument();
             htmlDoc.LoadHtml(eventData.html);
-            var title = HtmlEntity.DeEntitize(htmlDoc.DocumentNode.SelectSingleNode("//a").InnerText); 
+            var htmlNodes = htmlDoc.DocumentNode.SelectNodes("//td");
 
+            var title = HtmlEntity.DeEntitize(htmlNodes.ElementAt(7).InnerText);
+            var refSiam = htmlNodes.ElementAt(1).InnerText;
+            var equipment = HtmlEntity.DeEntitize(htmlNodes.ElementAt(5).InnerText);
+
+            var rexAsked = false;
+            var incidentTelecom = false;
+            var brouillage = false;
+            var following = false;
+
+            var options = htmlNodes.ElementAt(7).SelectNodes("//img");
+            if(options != null && options.Count > 0)
+            {
+                foreach(var n in options)
+                {
+                    var altAttribute = HtmlEntity.DeEntitize(n.GetAttributeValue("alt", string.Empty)).ToLower();
+
+                    if (altAttribute.StartsWith("évè"))
+                    {
+                        following = true;
+                        continue;
+                    }
+                    if(altAttribute.StartsWith("rex"))
+                    {
+                        rexAsked = true;
+                        continue;
+                    }
+                    if (altAttribute.StartsWith("bro"))
+                    {
+                        brouillage = true;
+                        continue;
+                    }
+                    if (altAttribute.StartsWith("inc"))
+                    {
+                        incidentTelecom = true;
+                        continue;
+                    }
+                }
+            }
+
+            var duration = TimeSpan.FromSeconds(eventData.to - eventData.from);
+            
             return new TechEvent
             {
                 IdSiam = eventData.id_evt,
-                ReferenceSiam = eventData.id,
+                ReferenceSiam = refSiam,
                 StartDate = UnixEpoch.AddSeconds(eventData.from),
                 Title = title,
-                Duration = TimeSpan.FromSeconds(eventData.to - eventData.from),
+                Duration = duration,
+                CalculatedDuration = ToHumanReadableString(duration),
+                Group = equipment,
+                RexAsked = rexAsked,
+                Telecom = incidentTelecom,
+                Jamming = brouillage,
+                Modified = following,
             };
+        }
+
+        public static string ToHumanReadableString(TimeSpan t)
+        {
+            if (t.TotalSeconds <= 1)
+            {
+                return "sD";
+            }
+            if (t.TotalMinutes <= 1)
+            {
+                return string.Format("{0:ss} s", t);
+            }
+            if (t.TotalHours <= 1)
+            {
+                return string.Format("{0:mm} m", t);
+            }
+            if (t.TotalDays <= 1)
+            {
+                return string.Format("{0:hh} h", t);
+            }
+
+            return string.Format("{0:dd} j", t);
         }
 
         private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0);

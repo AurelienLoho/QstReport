@@ -2,16 +2,18 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:QstReport"
-        Title="Bilan hebdomadaire QST V4.0"
+        Title="Bilan hebdomadaire QST V4.1"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen"
         Icon="Images/634.png">
     <Window.Resources>
+        <!--<BitmapImage x:Key="siteLogo" UriSource="pack://application:,,,/Images/site.cdg.png"/>-->
+        
         <Style TargetType="GroupBox">
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Margin" Value="2"/>
         </Style>
-        
+      
         <local:InverseBooleanConverter x:Key="inverseBooleanConverter"/>
     </Window.Resources>
     <Grid Width="450">
@@ -36,9 +38,9 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button Content="Rapport RCO" Command="{Binding SetCurrentRcoPeriodCommand}" Margin="2,2,10,2" FontWeight="Bold" Width="120" Height="30" ToolTip="Rapport pour la semaine courante et la semaine passée."/>
-                    <Button Content="Rapport GSST" Command="{Binding SetCurrentGsstPeriodCommand}" Margin="5,2,5,2" FontWeight="Bold" Width="120" Height="30" ToolTip="Rapport pour la semaine courante et les deux semaiens passées."/>
-                    <Button Content="Période Libre" Command="{Binding SelectFreePeriodCommand}" Margin="10,2,2,2" FontWeight="Bold" Width="120" Height="30" ToolTip="Choix libre de date de début et de fin."/>
+                    <RadioButton Content="Rapport RCO" Command="{Binding SetCurrentRcoPeriodCommand}" Margin="2,2,10,2" FontWeight="Bold" Width="120" Height="30" ToolTip="Rapport pour la semaine courante et la semaine passée." Style="{StaticResource {x:Type ToggleButton}}" IsChecked="True"/>
+                    <RadioButton Content="Rapport GSST" Command="{Binding SetCurrentGsstPeriodCommand}" Margin="5,2,5,2" FontWeight="Bold" Width="120" Height="30" ToolTip="Rapport pour la semaine courante et les deux semaiens passées." Style="{StaticResource {x:Type ToggleButton}}"/>
+                    <RadioButton Content="Période Libre" Command="{Binding SelectFreePeriodCommand}" Margin="10,2,2,2" FontWeight="Bold" Width="120" Height="30" ToolTip="Choix libre de date de début et de fin." Style="{StaticResource {x:Type ToggleButton}}"/>
                 </StackPanel>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="Du : " HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold"/>
@@ -48,8 +50,8 @@
                 
                 <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal">
                     <TextBlock Text="Source de données : " VerticalAlignment="Center"/>
-                    <RadioButton Content="Siam V4" Margin="7,5,5,5" VerticalAlignment="Center" IsChecked="{Binding UseSiamV5, Converter={StaticResource inverseBooleanConverter}}"/>
-                    <RadioButton Content="Siam V5" Margin="5" VerticalAlignment="Center" IsChecked="{Binding UseSiamV5}"/>
+                    <RadioButton Content="Siam V4" Margin="7,5,5,5" Width="120" Height="30" VerticalAlignment="Center" IsChecked="{Binding UseSiamV5, Converter={StaticResource inverseBooleanConverter}}" Style="{StaticResource {x:Type ToggleButton}}" />
+                    <RadioButton Content="Siam V5" Margin="5" Width="120" Height="30" VerticalAlignment="Center" IsChecked="{Binding UseSiamV5}" Style="{StaticResource {x:Type ToggleButton}}"/>
                 </StackPanel>
             </Grid>            
         </GroupBox>
@@ -74,6 +76,8 @@
                 <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding CurrentProgressText}" FontWeight="Bold" Height="25" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,10,0,2"/>
 
                 <Button Grid.Row="2" Grid.ColumnSpan="2" Content="Générer le rapport" Command="{Binding CreateReportCommand}" Height="40" Width="200" Margin="2" FontWeight="Bold"/>
+                
+                <!--<Image Grid.Row="2" Grid.Column="1" Source="{StaticResource siteLogo}" Width="100" HorizontalAlignment="Right"/>-->
             </Grid>
         </GroupBox>
     </Grid>

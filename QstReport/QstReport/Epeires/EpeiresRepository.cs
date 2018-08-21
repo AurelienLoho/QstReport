@@ -78,14 +78,15 @@ namespace QstReport.Epeires
                        .Where(y => y.CategoryRootId == 9 || y.CategoryRootId == 83 || y.CategoryRootId == 111) // 9 => CDG, 83 => BRIA, 111 => LBG
                        .Select(x =>
                                 {
-                                    var fieldArray = x.Fields.Values.ToArray();                                    
+                                    //var fieldArray = x.Fields.Values.ToArray();                                    
 
                                     return new ExploitEvent
                                     {
                                         StartDate = x.StartDate,
                                         EndDate = x.EndDate, 
-                                        Title = x.Title, //fieldArray.Length >= 1 ? fieldArray[0] : string.Empty,
-                                        Description = fieldArray.Length >= 2 ? HtmlEntity.DeEntitize(fieldArray[1]) : string.Empty,
+                                        Title = x.Title, 
+                                        //Description = fieldArray.Length >= 2 ? HtmlEntity.DeEntitize(fieldArray[1]) : string.Empty,
+                                        Description = HtmlEntity.DeEntitize(x.EpeiresFields.Description),
                                         AirportCode = LocationFromCategoryId(x.CategoryRootId)
                                     };
                                 })
