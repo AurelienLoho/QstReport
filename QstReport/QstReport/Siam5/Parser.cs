@@ -91,7 +91,7 @@ namespace QstReport.Siam5
 
                 foreach(var item in unfilteredList)
                 {
-                    var trimmed = item.Trim();
+                    var trimmed = HtmlEntity.DeEntitize(item.Trim());
 
                     if (trimmed.StartsWith("Super")) { continue; }
 
@@ -153,7 +153,7 @@ namespace QstReport.Siam5
 
         private static Entite EntityFromText(string entityName)
         {
-            switch(entityName.ToLower())
+            switch (entityName.ToLower())
             {
                 case "traitement radar": { return Entite.TraitementRadar; }
                 case "radionavigation": { return Entite.Radionavigation; }
@@ -163,11 +163,15 @@ namespace QstReport.Siam5
                 case "traitement plans de vols": { return Entite.TraitementPlanDeVol; }
                 case "energie et climatisation": { return Entite.EnergieClimatisation; }
                 case "radars": { return Entite.Radars; }
+                case "radio tã©lã©phone":   // FIX : problème d'encoding du nom de l'entité
                 case "radio téléphone": { return Entite.RadioTelephone; }
+                case "rã©seaux": // FIX : problème d'encoding du nom de l'entité
                 case "réseaux": { return Entite.Reseaux; }
                 case "instruction": { return Entite.Instruction; }
                 case "informatique bureautique": { return Entite.Bureautique; }
-                default: { return Entite.Unknown; }
+                default: {
+                    return Entite.Unknown; 
+                }
             }
         }
 
