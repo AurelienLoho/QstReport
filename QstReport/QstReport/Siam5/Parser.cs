@@ -191,6 +191,7 @@ namespace QstReport.Siam5
 
                 case Entite.SimulationSupervision:
                 case Entite.TraitementPlanDeVol:
+                case Entite.Reseaux:
                 case Entite.TraitementRadar: { return Pole.ATM; }
 
                 case Entite.Unknown:
