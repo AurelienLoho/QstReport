@@ -75,7 +75,17 @@ namespace QstReport.Siam5
 
             foreach (var node in locatioNodes)
             {
-                locations.Add(node.InnerText);
+                var locs = node.InnerText.Split(',');
+
+                foreach (var l in locs)
+                {
+                    switch(l.ToLower())
+                    {
+                        case "le bourget": { locations.Add("LFPB"); break; }
+                        case "roissy cdg": { locations.Add("LFPG"); break; }
+                        default: { break; }
+                    }
+                }
             }
 
             return locations;
